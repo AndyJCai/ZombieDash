@@ -2,16 +2,15 @@
 #define ACTOR_H_
 
 #include "GraphObject.h"
+#include "GameConstants.h"
 #include "StudentWorld.h"
+
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
-//Create a base class which all other classes will derive
-//This base class derives from GraphObject
-//It should have a doSomething() function
-//Which functions should be virtual? or pure virtual? Will this class ever be instantiated?
-//Add any public/private member functions and any private data members you need
-//Recommendation: Start with this class
+enum ActorType {
+    e_penelope, e_actor, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame,
+};
 
 class StudentWorld;
 
@@ -19,11 +18,13 @@ class Actor : public GraphObject
 {
 public:
     Actor(StudentWorld* sw, int imageID, double startX, double startY, Direction dir, int depth);
-    virtual void doSomething();
+    virtual void doSomething()=0;
     virtual bool isAlive() const;
     virtual bool isBlocked() const;
+    //Methods to check overlapping
+    virtual ActorType getType() const;
     StudentWorld* getWorld() const;
-    bool overlap(const Actor& otherActor);
+    virtual bool overlap(const Actor& otherActor) const;
     void setDead();
 private:
     StudentWorld* m_world;
@@ -34,15 +35,26 @@ private:
 class BlockMovement : public Actor //Zombies, Citizens, Walls
 {
 public:
-    BlockMovement(StudentWorld* sw, int imageID, double startX, double startY, Direction dir);
+    BlockMovement(StudentWorld* sw, int imageID, double startX, double startY);
     virtual bool isBlocked() const;
+    virtual ActorType getType() const;
 private:
+};
+
+class Goodie : public Actor //Goodies
+{
+public:
+    Goodie(StudentWorld* sw, int imageID, double startX, double startY);
+    virtual ActorType getType() const;
+    virtual void doSomething();
 };
 
 class Wall : public BlockMovement
 {
 public:
     Wall(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+    virtual ActorType getType() const;
 };
 
 class Penelope : public BlockMovement
@@ -50,21 +62,70 @@ class Penelope : public BlockMovement
 public:
     Penelope(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
+    virtual ActorType getType() const;
     bool isAlive() const;
-    void throwFlame();
     bool isInfected() const;
+    void throwFlame();
+    void changeVaccine(int num);
+    void changeGas(int num);
+    void changeLandmine(int num);
     
 private:
-    int m_flameCount = 0;
-    int m_infectCount = 0;
+    int m_flameCount;
+    int m_infectCount;
+    int m_vaccineCount;
+    int m_landmineCount;
 };
 
 class Exit : public Actor
 {
 public:
     Exit(StudentWorld* sw, double startX, double startY);
+    virtual ActorType getType() const;
     virtual void doSomething();
 };
 
+class Pit : public Actor
+{
+public:
+    Pit(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+    virtual ActorType getType() const;
+};
+
+
+class VaccineGoodie : public Goodie
+{
+public:
+    VaccineGoodie(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+//    virtual ActorType getType() const;
+};
+
+class GasCanGoodie : public Goodie
+{
+public:
+    GasCanGoodie(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+//    virtual ActorType getType() const;
+};
+
+class LandmineGoodie : public Goodie
+{
+public:
+    LandmineGoodie(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+//    virtual ActorType getType() const;
+};
+
+class Flame : public Actor
+{
+public:
+    Flame(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+    virtual ActorType getType() const;
+private:
+    int m_tickCount;
+};
 
 #endif // ACTOR_H_

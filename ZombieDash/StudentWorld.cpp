@@ -3,6 +3,7 @@
 #include "Actor.h"
 #include "Level.h"
 #include <string>
+#include <sstream>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -32,6 +33,7 @@ void StudentWorld::loadLevel(int level){
         levelStr = "0"+levelStr;
     }
     string levelFile = "level"+levelStr+".txt";
+//    string levelFile = "level02.txt";
     Level::LoadResult result = lev.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found)
         cerr << "Cannot find"<<levelFile<<" data file" << endl;
@@ -49,45 +51,37 @@ void StudentWorld::loadLevel(int level){
                 switch (ge) // so x=80 and y=160
                 {
                     case Level::empty:
-                        //TODO: Spawn a Empty Spot
-                        cout << "Location "<<startX<<", "<<startY<<" is empty" << endl;
                         break;
                     case Level::smart_zombie:
                         //TODO: Spawn a Smart Zombie
-                        cout << "Location "<<startX<<", "<<startY<<" starts with a smart zombie" << endl;
                         break;
                     case Level::dumb_zombie:
                         //TODO: Spawn a Dumb Zombie
-                        cout << "Location "<<startX<<", "<<startY<<" starts with a dumb zombie" << endl;
                         break;
                     case Level::player:
-                        //TODO: Spawn a Penelope
                         m_penelope = new Penelope(this, startX, startY);
-                        cout << "Location "<<startX<<", "<<startY<<" is where Penelope starts" << endl;
                         break;
                     case Level::exit:
-                        //TODO: Spawn an Exit
-                        cout << "Location "<<startX<<", "<<startY<<" is where an exit is" << endl;
+                        m_actors.push_back(new Exit(this, startX, startY));
                         break;
                     case Level::wall:
                         m_actors.push_back(new Wall(this, startX, startY));
-                        cout << "Location "<<startX<<", "<<startY<<" holds a Wall" << endl;
                         break;
                     case Level::pit:
-                        cout << "Location "<<startX<<", "<<startY<<" has a pit in the ground" << endl;
+                        m_actors.push_back(new Pit(this, startX, startY));
                         break;
                         // etc…
                     case Level::citizen:
-                        cout << "Location "<<startX<<", "<<startY<<" starts with a citizen" << endl;
+                        //TODO: Spawn a Citizen
                         break;
                     case Level::vaccine_goodie:
-                        cout << "Location "<<startX<<", "<<startY<<" is where Vaccine Goodie" <<endl;
+                        m_actors.push_back(new VaccineGoodie(this, startX, startY));
                         break;
                     case Level::gas_can_goodie:
-                        cout << "Location "<<startX<<", "<<startY<<" is where Gas Can Goodie" <<endl;
+                        m_actors.push_back(new GasCanGoodie(this, startX, startY));
                         break;
                     case Level::landmine_goodie:
-                        cout << "Location "<<startX<<", "<<startY<<" is where a Landmine Goodie." <<endl;
+                        m_actors.push_back(new LandmineGoodie(this, startX, startY));
                         break;
                 }
             }
@@ -97,12 +91,16 @@ void StudentWorld::loadLevel(int level){
 
 int StudentWorld::move()
 {
-//    // This code is here merely to allow the game to build, run, and terminate after you hit enter.
-//    // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
+    // This code is here merely to allow the game to build, run, and terminate after you hit enter.
+    // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
 //
 //    // The term "actors" refers to all zombies, Penelope, goodies,
 //    // pits, flames, vomit, landmines, etc.
 //    // Give each actor a chance to do something, including Penelope
+    if (m_penelope->isAlive())
+        m_penelope->doSomething();
+    else
+        return GWSTATUS_PLAYER_DIED;
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
         if ((*iter)->isAlive())
@@ -111,38 +109,51 @@ int StudentWorld::move()
             (*iter)->doSomething();
             if (!m_penelope->isAlive())
                 return GWSTATUS_PLAYER_DIED;
+            
             //Penelope completed the current level
 //            if ()
 //                return GWSTATUS_FINISHED_LEVEL;
         }
+    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();)
+        {
+            //TODO: finish this shit
+            if (*iter && !(*iter)->isAlive())
+            {
+                Actor* tempIter = *iter;
+                delete tempIter;
+                tempIter = nullptr;
+                m_actors.erase(iter);
+            }
+            iter++;
+        }
     }
-//    // Remove newly-dead actors after each tick
-//    // Update the game status line
-//    for (int i = 0;i<m_actors.size();i++)
-//    {
-//
-//    }
-//////    Update Display Text // update the score/lives/level text at screen top
-////    // the player hasn’t completed the current level and hasn’t died, so
-////    // continue playing the current level
+    // Update the game status line
+    //    Update Display Text
+    // update the score/lives/level text at screen top
+    // the player hasn’t completed the current level and hasn’t died, so
+    // continue playing the current level
     return GWSTATUS_CONTINUE_GAME;
-    decLives();
 //    return GWSTATUS_PLAYER_DIED;
 }
 
 void StudentWorld::cleanUp()
 {
-    m_actors.clear();
+    if (!m_actors.empty())
+    {
+        for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+        {
+            delete *iter;
+            *iter = nullptr;
+        }
+    }
+//    if (m_penelope != nullptr)
+    delete m_penelope;
+    m_penelope = nullptr;
 }
 
-void StudentWorld::setPenelope(Actor *p)
+void StudentWorld::setPenelope(Penelope *p)
 {
     m_penelope = p;
-}
-
-void StudentWorld::addActor(Actor *p)
-{
-    m_actors.push_back(p);
 }
                 
 Actor* StudentWorld::getActorAt(int x, int y)
@@ -155,7 +166,7 @@ Actor* StudentWorld::getActorAt(int x, int y)
     return nullptr;
 }
 
-bool StudentWorld::doesOverlap(int x, int y)
+bool StudentWorld::doesBlockMovement(int x, int y)
 {
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
@@ -171,3 +182,32 @@ bool StudentWorld::doesOverlap(int x, int y)
     return false;
 }
 
+//Actor* StudentWorld::collides(Actor* actor)
+//{
+//    //TODO: need to fiX!!!!!
+//    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+//    {
+//        if ((*iter) != actor)
+//        {
+//            if (actor->overlap(**iter))
+//                return *iter;
+//        }
+//    }
+//    return nullptr;
+//}
+
+Penelope* StudentWorld::getPenelope()
+{
+    return m_penelope;
+}
+
+StudentWorld::~StudentWorld()
+{
+    cleanUp();
+}
+
+//Score: 004500  Level: 27  Lives: 3  Vaccines:    2        Flames:    16        Mines:    1        Infected:    0
+void StudentWorld::updateGameStats()
+{
+    //TODO: finish
+}
