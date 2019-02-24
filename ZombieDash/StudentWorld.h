@@ -20,11 +20,12 @@ public:
     virtual void cleanUp();
     void setPenelope(Penelope* p);
     void loadLevel(int level);
-    bool doesBlockMovement(int x, int y); //Makes sure objects don't overstep on each other
-    Actor* getActorAt(int x, int y);
+    bool doesBlockMovement(double x, double y); //Makes sure objects don't overstep on each other
+    Actor* getActorAt(double x, double y);
 //    Actor* collides(Actor* actor);
     Penelope* getPenelope();
     void updateGameStats();
+    Actor* getClosestZombie(double x, double y);
 
 private:
     std::vector<Actor*> m_actors;

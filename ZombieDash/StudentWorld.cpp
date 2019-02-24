@@ -154,7 +154,7 @@ void StudentWorld::setPenelope(Penelope *p)
     m_penelope = p;
 }
                 
-Actor* StudentWorld::getActorAt(int x, int y)
+Actor* StudentWorld::getActorAt(double x, double y)
 {
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
@@ -164,7 +164,7 @@ Actor* StudentWorld::getActorAt(int x, int y)
     return nullptr;
 }
 
-bool StudentWorld::doesBlockMovement(int x, int y)
+bool StudentWorld::doesBlockMovement(double x, double y)
 {
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
@@ -204,6 +204,24 @@ StudentWorld::~StudentWorld()
     cleanUp();
 }
 
+Actor* StudentWorld::getClosestZombie(double x, double y)
+{
+    Actor* temp = nullptr;
+    double distance = 0;
+    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+    {
+        if ((*iter)->getType() == ActorType::e_zombie)
+        {
+            if ((*iter)->distance(x, y) < distance)
+            {
+                distance = (*iter)->distance(x, y);
+                temp = *iter;
+            }
+        }
+    }
+    return temp;
+}
+
 //Score: 004500  Level: 27  Lives: 3  Vaccines:    2        Flames:    16        Mines:    1        Infected:    0
 void StudentWorld::updateGameStats()
 {
@@ -212,8 +230,10 @@ void StudentWorld::updateGameStats()
     gameStatus << "Score: ";
     if (getScore() < 0)
         gameStatus << "-";
-    gameStatus <<setw(6) <<getScore();
+    int score = getScore() >= 0? getScore():-getScore();
+    gameStatus <<setw(6) <<score;
     gameStatus.fill('0');
+    //TODO: fix filling the 0's
     gameStatus << twoSpaces;
     gameStatus << "Level: ";
     gameStatus << getLevel();
@@ -226,6 +246,7 @@ void StudentWorld::updateGameStats()
     gameStatus << twoSpaces;
     gameStatus << "Flames: ";
     gameStatus << this->getPenelope()->getFlameCount();
+    gameStatus << twoSpaces;
     gameStatus << "Mines: ";
     gameStatus << this->getPenelope()->getLandmineCount();
     gameStatus << twoSpaces;

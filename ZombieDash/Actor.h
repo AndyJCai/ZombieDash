@@ -9,7 +9,7 @@
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
 enum ActorType {
-    e_penelope, e_actor, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame,
+    e_penelope, e_actor, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame, e_citizen, e_zombie
 };
 
 class StudentWorld;
@@ -26,6 +26,7 @@ public:
     StudentWorld* getWorld() const;
     virtual bool overlap(Actor* otherActor) const;
     void setDead();
+    double distance(double x, double y) const;
 private:
     StudentWorld* m_world;
     bool m_alive;
@@ -41,12 +42,29 @@ public:
 private:
 };
 
+//class HumanFigure : public BlockMovement //Citizen, Penelope
+//{
+//public:
+//}
+
 class Goodie : public Actor //Goodies
 {
 public:
     Goodie(StudentWorld* sw, int imageID, double startX, double startY);
     virtual ActorType getType() const;
     virtual void doSomething();
+};
+
+class Citizen: public BlockMovement
+{
+public:
+    Citizen(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+    virtual ActorType getType() const;
+private:
+    int m_infectCount;
+    int m_tickCount;
+    bool m_infected;
 };
 
 class Wall : public BlockMovement

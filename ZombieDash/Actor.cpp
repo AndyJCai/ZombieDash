@@ -41,6 +41,11 @@ ActorType Actor::getType() const
     return ActorType::e_actor;
 }
 
+double Actor::distance(double x, double y) const
+{
+    return sqrt((getX()-x)*(getX()-x)+(getY()-y)*(getY()-y));
+}
+
 ///////////////////////////////////////////////////////////////
 //                      BlockMovement                        //
 ///////////////////////////////////////////////////////////////
@@ -55,6 +60,39 @@ ActorType BlockMovement::getType() const
 bool BlockMovement::isBlocked() const
 {
     return true;
+}
+
+///////////////////////////////////////////////////////////////
+//                         Citizen                           //
+///////////////////////////////////////////////////////////////
+Citizen::Citizen(StudentWorld* sw, double startX, double startY):m_infectCount(0),m_infected(false),m_tickCount(1),BlockMovement(sw, IID_CITIZEN, startX, startY)
+{}
+
+ActorType Citizen::getType() const
+{
+    return ActorType::e_citizen;
+}
+
+void Citizen::doSomething()
+{
+    if (!isAlive())
+        return;
+    if (m_infected)
+        m_infectCount++;
+    if (m_infectCount >= 500)
+    {
+        setDead();
+        this->getWorld()->playSound(SOUND_ZOMBIE_BORN);
+        this->getWorld()->increaseScore(-1000);
+        //TODO: add a zombie into the world;
+        return;
+    }
+    if (m_tickCount%2 == 0)
+        return;
+    double currX = this->getX();
+    double currY = this->getY();
+    double dist_p = sqrt((currX - this->getWorld()->getPenelope()->getX())*(currX - this->getWorld()->getPenelope()->getX()) + (currY - this->getWorld()->getPenelope()->getY())*(currY - this->getWorld()->getPenelope()->getY()));
+    
 }
 
 ///////////////////////////////////////////////////////////////
@@ -149,7 +187,7 @@ void Wall::doSomething()
 //                           Penelope                        //
 ///////////////////////////////////////////////////////////////
 
-Penelope::Penelope(StudentWorld* sw, double startX, double startY):m_flameCount(0),m_infectCount(0),m_vaccineCount(0),BlockMovement(sw, IID_PLAYER, startX, startY)
+Penelope::Penelope(StudentWorld* sw, double startX, double startY):m_flameCount(0),m_infectCount(0),m_vaccineCount(0),m_landmineCount(0),BlockMovement(sw, IID_PLAYER, startX, startY)
 {
     //TODO: finish
 }
@@ -302,6 +340,11 @@ ActorType Exit::getType() const
 void Exit::doSomething()
 {
     //TODO: finish this
+    if (overlap(this->getWorld()->getPenelope()))
+    {
+//        if (finishedLevel())
+        this->getWorld()->advanceToNextLevel();
+    }
 }
 
 ///////////////////////////////////////////////////////////////
