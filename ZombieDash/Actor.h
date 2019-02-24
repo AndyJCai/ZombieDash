@@ -24,7 +24,7 @@ public:
     //Methods to check overlapping
     virtual ActorType getType() const;
     StudentWorld* getWorld() const;
-    virtual bool overlap(const Actor& otherActor) const;
+    virtual bool overlap(Actor* otherActor) const;
     void setDead();
 private:
     StudentWorld* m_world;
@@ -69,6 +69,10 @@ public:
     void changeVaccine(int num);
     void changeGas(int num);
     void changeLandmine(int num);
+    int getFlameCount() const;
+    int getVaccineCount() const;
+    int getLandmineCount() const;
+    int getInfectCount() const;
     
 private:
     int m_flameCount;

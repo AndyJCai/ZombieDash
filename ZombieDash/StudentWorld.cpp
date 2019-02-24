@@ -4,6 +4,7 @@
 #include "Level.h"
 #include <string>
 #include <sstream>
+#include <iomanip>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -20,7 +21,6 @@ StudentWorld::StudentWorld(string assetPath)
 
 int StudentWorld::init()
 {
-    
     loadLevel(getLevel());
     return GWSTATUS_CONTINUE_GAME;
 }
@@ -28,12 +28,9 @@ int StudentWorld::init()
 void StudentWorld::loadLevel(int level){
     Level lev(assetPath());
     string levelStr = to_string(level);
-    if (level < 10)
-    {
-        levelStr = "0"+levelStr;
-    }
+    levelStr = level < 10 ? "0"+levelStr : levelStr;
     string levelFile = "level"+levelStr+".txt";
-//    string levelFile = "level02.txt";
+//    string levelFile = "level04.txt";
     Level::LoadResult result = lev.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found)
         cerr << "Cannot find"<<levelFile<<" data file" << endl;
@@ -132,6 +129,7 @@ int StudentWorld::move()
     // update the score/lives/level text at screen top
     // the player hasn’t completed the current level and hasn’t died, so
     // continue playing the current level
+    updateGameStats();
     return GWSTATUS_CONTINUE_GAME;
 //    return GWSTATUS_PLAYER_DIED;
 }
@@ -209,5 +207,29 @@ StudentWorld::~StudentWorld()
 //Score: 004500  Level: 27  Lives: 3  Vaccines:    2        Flames:    16        Mines:    1        Infected:    0
 void StudentWorld::updateGameStats()
 {
-    //TODO: finish
+    string twoSpaces = "  ";
+    ostringstream gameStatus;
+    gameStatus << "Score: ";
+    if (getScore() < 0)
+        gameStatus << "-";
+    gameStatus <<setw(6) <<getScore();
+    gameStatus.fill('0');
+    gameStatus << twoSpaces;
+    gameStatus << "Level: ";
+    gameStatus << getLevel();
+    gameStatus << twoSpaces;
+    gameStatus << "Lives: ";
+    gameStatus << getLives();
+    gameStatus << twoSpaces;
+    gameStatus << "Vaccines: ";
+    gameStatus << this->getPenelope()->getVaccineCount();
+    gameStatus << twoSpaces;
+    gameStatus << "Flames: ";
+    gameStatus << this->getPenelope()->getFlameCount();
+    gameStatus << "Mines: ";
+    gameStatus << this->getPenelope()->getLandmineCount();
+    gameStatus << twoSpaces;
+    gameStatus << "Infected: ";
+    gameStatus << this->getPenelope()->getInfectCount();
+    setGameStatText(gameStatus.str());
 }

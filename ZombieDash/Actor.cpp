@@ -21,9 +21,9 @@ bool Actor::isBlocked() const
     return false;
 }
 
-bool Actor::overlap(const Actor &otherActor) const
+bool Actor::overlap(Actor* otherActor) const
 {
-    return sqrt((getX()-otherActor.getX())*(getX()-otherActor.getX())+(getY()-otherActor.getY())*(getY()-otherActor.getY()))<=10;
+    return sqrt((getX()-otherActor->getX())*(getX()-otherActor->getX())+(getY()-otherActor->getY())*(getY()-otherActor->getY()))<=10;
 }
 
 StudentWorld* Actor::getWorld() const
@@ -70,7 +70,7 @@ void Goodie::doSomething()
     if (!isAlive())
         return;
     StudentWorld* currWorld = this->getWorld();
-    if (!currWorld->getPenelope()->overlap(*this))
+    if (!currWorld->getPenelope()->overlap(this))
         return;
     currWorld->increaseScore(50);
     setDead();
@@ -267,6 +267,25 @@ void Penelope::doSomething()
     }
 }
 
+int Penelope::getFlameCount() const
+{
+    return m_flameCount;
+}
+
+int Penelope::getInfectCount() const
+{
+    return m_infectCount;
+}
+
+int Penelope::getVaccineCount() const
+{
+    return m_vaccineCount;
+}
+
+int Penelope::getLandmineCount() const
+{
+    return m_landmineCount;
+}
 ///////////////////////////////////////////////////////////////
 //                           Exit                            //
 ///////////////////////////////////////////////////////////////
