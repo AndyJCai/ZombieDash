@@ -1,5 +1,6 @@
 #include "Actor.h"
 //#include <cmath>
+using namespace std;
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 
@@ -63,15 +64,20 @@ bool BlockMovement::isBlocked() const
 }
 
 ///////////////////////////////////////////////////////////////
+//                         Human                             //
+///////////////////////////////////////////////////////////////
+Human::Human(StudentWorld* sw, int imageID, double startX, double startY):BlockMovement(sw, imageID, startX, startY){}
+
+ActorType Human::getType() const
+{
+    return ActorType::e_human;
+}
+
+///////////////////////////////////////////////////////////////
 //                         Citizen                           //
 ///////////////////////////////////////////////////////////////
-Citizen::Citizen(StudentWorld* sw, double startX, double startY):m_infectCount(0),m_infected(false),m_tickCount(1),BlockMovement(sw, IID_CITIZEN, startX, startY)
+Citizen::Citizen(StudentWorld* sw, double startX, double startY):m_infectCount(0),m_infected(false),m_tickCount(0),Human(sw, IID_CITIZEN, startX, startY)
 {}
-
-ActorType Citizen::getType() const
-{
-    return ActorType::e_citizen;
-}
 
 void Citizen::doSomething()
 {
@@ -87,12 +93,245 @@ void Citizen::doSomething()
         //TODO: add a zombie into the world;
         return;
     }
+    m_tickCount++;
     if (m_tickCount%2 == 0)
         return;
     double currX = this->getX();
     double currY = this->getY();
-    double dist_p = sqrt((currX - this->getWorld()->getPenelope()->getX())*(currX - this->getWorld()->getPenelope()->getX()) + (currY - this->getWorld()->getPenelope()->getY())*(currY - this->getWorld()->getPenelope()->getY()));
+    Penelope* p = this->getWorld()->getPenelope();
+    double dist_p = sqrt((currX - p->getX())*(currX - p->getX()) + (currY - p->getY())*(currY - p->getY()));
+    double dist_z = this->getWorld()->getClosestZombie(currX, currY);
     
+    if (dist_z == -1 || dist_p < dist_z)
+    {
+        if (dist_p <= 80)
+        {
+            if (currX == p->getX() || currY == p->getY())
+            {
+                //Version 1 of setting direction
+//                int dir = p->getDirection() >= 180 ? p->getDirection()-180 : p->getDirection()+180;
+                //Version 2 of setting direction
+                int dir = -1;
+                if (currX > p->getX())
+                    dir = left;
+                else if (currX < p->getX())
+                    dir = right;
+                if (currY > p->getY())
+                    dir = down;
+                else if (currY < p->getY())
+                    dir = up;
+                switch (dir)
+                {
+                    case right:
+                        if (!getWorld()->doesBlockMovement(currX+2, currY, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX+2, currY);
+                            return;
+                        }
+                        break;
+                    case up:
+                        
+                        this->setDirection(dir);
+                        if (!getWorld()->doesBlockMovement(currX, currY+2, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX, currY+2);
+                            return;
+                        }
+                        break;
+                    case left:
+                        
+                        this->setDirection(dir);
+                        if (!getWorld()->doesBlockMovement(currX-2, currY, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX-2, currY);
+                            return;
+                        }
+                        break;
+                    case down:
+                        
+                        this->setDirection(dir);
+                        if (!getWorld()->doesBlockMovement(currX, currY-2, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX, currY-2);
+                            return;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                int rand = randInt(0, 1);
+                int dir1 = p->getX() > currX ? right: left;
+                int dir2 = p->getY() > currY ? up : down;
+                int dir = rand == 0 ? dir1 : dir2;
+                int otherDir = rand == 1 ? dir2 : dir1;
+                switch (dir)
+                {
+                    case right:
+                        if (!getWorld()->doesBlockMovement(currX+2, currY, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX+2, currY);
+                            return;
+                        }
+                        break;
+                    case up:
+                        if (!getWorld()->doesBlockMovement(currX, currY+2, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX, currY+2);
+                            return;
+                        }
+                        break;
+                    case left:
+                        if (!getWorld()->doesBlockMovement(currX-2, currY, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX-2, currY);
+                            return;
+                        }
+                        break;
+                    case down:
+                        if (!getWorld()->doesBlockMovement(currX, currY-2, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX, currY-2);
+                            return;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                dir = otherDir;
+                switch (dir)
+                {
+                    case right:
+                        if (!getWorld()->doesBlockMovement(currX+2, currY, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX+2, currY);
+                            return;
+                        }
+                        break;
+                    case up:
+                        if (!getWorld()->doesBlockMovement(currX, currY+2, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX, currY+2);
+                            return;
+                        }
+                        break;
+                    case left:
+                        if (!getWorld()->doesBlockMovement(currX-2, currY, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX-2, currY);
+                            return;
+                        }
+                        break;
+                    case down:
+                        if (!getWorld()->doesBlockMovement(currX, currY-2, this))
+                        {
+                            this->setDirection(dir);
+                            this->moveTo(currX, currY-2);
+                            return;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else if (dist_z <= 80)
+        {
+            double projectedDistance;
+            int dir = -1;
+            if (!getWorld()->doesBlockMovement(currX+2, currY, this))
+            {
+                projectedDistance = getWorld()->getClosestZombie(currX+2, currY);
+                if (dist_z < projectedDistance)
+                {
+                    dir = right;
+                    dist_z = projectedDistance;
+                }
+            }
+            if (!getWorld()->doesBlockMovement(currX, currY+2, this))
+            {
+                projectedDistance = getWorld()->getClosestZombie(currX, currY+2);
+                if (dist_z < projectedDistance)
+                {
+                    dir = up;
+                    dist_z = projectedDistance;
+                }
+            }
+            if (!getWorld()->doesBlockMovement(currX-2, currY, this))
+            {
+                projectedDistance = getWorld()->getClosestZombie(currX-2, currY);
+                if (dist_z < projectedDistance)
+                {
+                    dir = left;
+                    dist_z = projectedDistance;
+                }
+            }
+            if (!getWorld()->doesBlockMovement(currX, currY-2, this))
+            {
+                projectedDistance = getWorld()->getClosestZombie(currX, currY-2);
+                if (dist_z < projectedDistance)
+                {
+                    dir = down;
+                    dist_z = projectedDistance;
+                }
+            }
+            if (dir == -1)
+                return;
+            switch (dir)
+            {
+                case right:
+                    if (!getWorld()->doesBlockMovement(currX+2, currY, this))
+                    {
+                        this->setDirection(dir);
+                        this->moveTo(currX+2, currY);
+                        return;
+                    }
+                    break;
+                case up:
+                    if (!getWorld()->doesBlockMovement(currX, currY+2, this))
+                    {
+                        this->setDirection(dir);
+                        this->moveTo(currX, currY+2);
+                        return;
+                    }
+                    break;
+                case left:
+                    if (!getWorld()->doesBlockMovement(currX-2, currY, this))
+                    {
+                        this->setDirection(dir);
+                        this->moveTo(currX-2, currY);
+                        return;
+                    }
+                    break;
+                case down:
+                    if (!getWorld()->doesBlockMovement(currX, currY-2, this))
+                    {
+                        this->setDirection(dir);
+                        this->moveTo(currX, currY-2);
+                        return;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return;
+        }
+        else
+            return;
+    }
 }
 
 ///////////////////////////////////////////////////////////////
@@ -105,14 +344,6 @@ Goodie::Goodie(StudentWorld* sw, int imageID, double startX, double startY):Acto
 
 void Goodie::doSomething()
 {
-    if (!isAlive())
-        return;
-    StudentWorld* currWorld = this->getWorld();
-    if (!currWorld->getPenelope()->overlap(this))
-        return;
-    currWorld->increaseScore(50);
-    setDead();
-    currWorld->playSound(SOUND_GOT_GOODIE);
 }
 
 ActorType Goodie::getType() const
@@ -131,7 +362,14 @@ VaccineGoodie::VaccineGoodie(StudentWorld* sw, double startX, double startY):Goo
 
 void VaccineGoodie::doSomething()
 {
-    Goodie::doSomething();
+    if (!isAlive())
+    return;
+    StudentWorld* currWorld = this->getWorld();
+    if (!currWorld->getPenelope()->overlap(this))
+        return;
+    currWorld->increaseScore(50);
+    setDead();
+    currWorld->playSound(SOUND_GOT_GOODIE);
     getWorld()->getPenelope()->changeVaccine(1);
 }
 
@@ -148,7 +386,14 @@ GasCanGoodie::GasCanGoodie(StudentWorld* sw, double startX, double startY):Goodi
 
 void GasCanGoodie::doSomething()
 {
-    Goodie::doSomething();
+    if (!isAlive())
+        return;
+    StudentWorld* currWorld = this->getWorld();
+    if (!currWorld->getPenelope()->overlap(this))
+        return;
+    currWorld->increaseScore(50);
+    setDead();
+    currWorld->playSound(SOUND_GOT_GOODIE);
     getWorld()->getPenelope()->changeGas(5);
 }
 //ActorType GasCanGoodie::getType() const
@@ -159,11 +404,18 @@ void GasCanGoodie::doSomething()
 ///////////////////////////////////////////////////////////////
 //                      Landmine Goodie                      //
 ///////////////////////////////////////////////////////////////
-LandmineGoodie::LandmineGoodie(StudentWorld* sw, double startX, double startY):Goodie(sw, IID_GAS_CAN_GOODIE, startX, startY){}
+LandmineGoodie::LandmineGoodie(StudentWorld* sw, double startX, double startY):Goodie(sw, IID_LANDMINE_GOODIE, startX, startY){}
 
 void LandmineGoodie::doSomething()
 {
-    Goodie::doSomething();
+    if (!isAlive())
+    return;
+    StudentWorld* currWorld = this->getWorld();
+    if (!currWorld->getPenelope()->overlap(this))
+        return;
+    currWorld->increaseScore(50);
+    setDead();
+    currWorld->playSound(SOUND_GOT_GOODIE);
     getWorld()->getPenelope()->changeLandmine(2);
 }
 
@@ -187,7 +439,7 @@ void Wall::doSomething()
 //                           Penelope                        //
 ///////////////////////////////////////////////////////////////
 
-Penelope::Penelope(StudentWorld* sw, double startX, double startY):m_flameCount(0),m_infectCount(0),m_vaccineCount(0),m_landmineCount(0),BlockMovement(sw, IID_PLAYER, startX, startY)
+Penelope::Penelope(StudentWorld* sw, double startX, double startY):m_flameCount(0),m_infectCount(0),m_vaccineCount(0),m_landmineCount(0),Human(sw, IID_PLAYER, startX, startY)
 {
     //TODO: finish
 }
@@ -236,13 +488,6 @@ void Penelope::changeLandmine(int num)
 
 void Penelope::doSomething()
 {
-    //KEY_PRESS_LEFT
-    //    KEY_PRESS_RIGHT
-    //    KEY_PRESS_UP
-    //    KEY_PRESS_DOWN
-    //    KEY_PRESS_SPACE
-    //    KEY_PRESS_TAB
-    //    KEY_PRESS_ENTER
     if (!isAlive())
         return;
     if (isInfected())
@@ -265,7 +510,7 @@ void Penelope::doSomething()
             case KEY_PRESS_LEFT:
                 //... move Penelope to the left ...
                 this->setDirection(left);
-                if (!getWorld()->doesBlockMovement(getX()-4, getY()))
+                if (!getWorld()->doesBlockMovement(getX()-4, getY(), this))
                 {
                     this->moveTo(getX()-4, getY());
                 }
@@ -273,21 +518,21 @@ void Penelope::doSomething()
             case KEY_PRESS_RIGHT:
                 //                ... move Penelope to the right ...
                 this->setDirection(right);
-                if (!getWorld()->doesBlockMovement(getX()+4, getY()))
+                if (!getWorld()->doesBlockMovement(getX()+4, getY(), this))
                 {
                     this->moveTo(getX()+4, getY());
                 }
                 break;
             case KEY_PRESS_UP:
                 this->setDirection(up);
-                if (!getWorld()->doesBlockMovement(getX(), getY()+4))
+                if (!getWorld()->doesBlockMovement(getX(), getY()+4, this))
                 {
                     this->moveTo(getX(), getY()+4);
                 }
                 break;
             case KEY_PRESS_DOWN:
                 this->setDirection(down);
-                if (!getWorld()->doesBlockMovement(getX(), getY()-4))
+                if (!getWorld()->doesBlockMovement(getX(), getY()-4, this))
                 {
                     this->moveTo(getX(), getY()-4);
                 }
@@ -297,6 +542,9 @@ void Penelope::doSomething()
                 throwFlame();
                 break;
             case KEY_PRESS_ENTER:
+                //...
+                break;
+            case KEY_PRESS_TAB:
                 //...
                 break;
             default:
@@ -343,6 +591,7 @@ void Exit::doSomething()
     if (overlap(this->getWorld()->getPenelope()))
     {
 //        if (finishedLevel())
+        if (false)//TODO: fix
         this->getWorld()->advanceToNextLevel();
     }
 }
@@ -366,9 +615,27 @@ void Pit::doSomething()
 }
 
 ///////////////////////////////////////////////////////////////
+//                      Projectile                           //
+///////////////////////////////////////////////////////////////
+Projectile::Projectile(StudentWorld* sw, int imageID, double startX, double startY):Actor(sw, imageID, startX, startY, right, 0)
+{
+    
+}
+
+ActorType Projectile::getType() const
+{
+    return ActorType::e_projectile;
+}
+
+void Projectile::doSomething()
+{
+    //TODO: finish this
+}
+
+///////////////////////////////////////////////////////////////
 //                         Flame                             //
 ///////////////////////////////////////////////////////////////
-Flame::Flame(StudentWorld* sw, double startX, double startY):m_tickCount(0),Actor(sw, IID_FLAME, startX, startY, right, 0)
+Flame::Flame(StudentWorld* sw, double startX, double startY):m_tickCount(0),Projectile(sw, IID_FLAME, startX, startY)
 {
     
 }
@@ -380,10 +647,62 @@ ActorType Flame::getType() const
 
 void Flame::doSomething()
 {
+    m_tickCount++;
     if (m_tickCount == 2)
         setDead();
-    m_tickCount++;
     if (!isAlive())
         return;
     //TODO: finish
 }
+
+///////////////////////////////////////////////////////////////
+//                        Zombie                             //
+///////////////////////////////////////////////////////////////
+Zombie::Zombie(StudentWorld* sw, double startX, double startY):BlockMovement(sw, IID_ZOMBIE, startX, startY)
+{
+    
+}
+
+void Zombie::doSomething()
+{
+    //TODO: finish
+    if (!isAlive())
+        return;
+    
+}
+
+ActorType Zombie::getType() const
+{
+    return ActorType::e_zombie;
+}
+
+///////////////////////////////////////////////////////////////
+//                        DumbZombie                         //
+///////////////////////////////////////////////////////////////
+DumbZombie::DumbZombie(StudentWorld* sw, double startX, double startY):Zombie(sw, startX, startY)
+{
+    
+}
+
+void DumbZombie::doSomething()
+{
+    //TODO: finish
+    if (!isAlive())
+        return;
+    
+}
+
+///////////////////////////////////////////////////////////////
+//                       SmartZombie                         //
+///////////////////////////////////////////////////////////////
+SmartZombie::SmartZombie(StudentWorld* sw, double startX, double startY):Zombie(sw, startX, startY)
+{
+    
+}
+
+void SmartZombie::doSomething()
+{
+    //TODO: finish
+}
+
+

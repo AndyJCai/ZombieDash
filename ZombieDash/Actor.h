@@ -9,7 +9,7 @@
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
 enum ActorType {
-    e_penelope, e_actor, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame, e_citizen, e_zombie
+    e_penelope, e_actor, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame, e_zombie, e_human, e_projectile
 };
 
 class StudentWorld;
@@ -42,10 +42,12 @@ public:
 private:
 };
 
-//class HumanFigure : public BlockMovement //Citizen, Penelope
-//{
-//public:
-//}
+class Human : public BlockMovement //Citizen, Penelope
+{
+public:
+    Human(StudentWorld* sw, int imageID, double startX, double startY);
+    virtual ActorType getType() const;
+};
 
 class Goodie : public Actor //Goodies
 {
@@ -55,12 +57,11 @@ public:
     virtual void doSomething();
 };
 
-class Citizen: public BlockMovement
+class Citizen: public Human
 {
 public:
     Citizen(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
-    virtual ActorType getType() const;
 private:
     int m_infectCount;
     int m_tickCount;
@@ -75,7 +76,7 @@ public:
     virtual ActorType getType() const;
 };
 
-class Penelope : public BlockMovement
+class Penelope : public Human
 {
 public:
     Penelope(StudentWorld* sw, double startX, double startY);
@@ -140,7 +141,15 @@ public:
 //    virtual ActorType getType() const;
 };
 
-class Flame : public Actor
+class Projectile : public Actor
+{
+public:
+    Projectile(StudentWorld* sw, int imageID, double startX, double startY);
+    virtual void doSomething();
+    virtual ActorType getType() const;
+};
+
+class Flame : public Projectile
 {
 public:
     Flame(StudentWorld* sw, double startX, double startY);
@@ -148,6 +157,28 @@ public:
     virtual ActorType getType() const;
 private:
     int m_tickCount;
+};
+
+class Zombie : public BlockMovement
+{
+public:
+    Zombie(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+    virtual ActorType getType() const;
+};
+
+class DumbZombie : public Zombie
+{
+public:
+    DumbZombie(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+};
+
+class SmartZombie : public Zombie
+{
+public:
+    SmartZombie(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
 };
 
 #endif // ACTOR_H_

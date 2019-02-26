@@ -27,10 +27,10 @@ int StudentWorld::init()
 
 void StudentWorld::loadLevel(int level){
     Level lev(assetPath());
-    string levelStr = to_string(level);
-    levelStr = level < 10 ? "0"+levelStr : levelStr;
-    string levelFile = "level"+levelStr+".txt";
-//    string levelFile = "level04.txt";
+//    string levelStr = to_string(level);
+//    levelStr = level < 10 ? "0"+levelStr : levelStr;
+//    string levelFile = "level"+levelStr+".txt";
+    string levelFile = "level04.txt";
     Level::LoadResult result = lev.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found)
         cerr << "Cannot find"<<levelFile<<" data file" << endl;
@@ -50,10 +50,10 @@ void StudentWorld::loadLevel(int level){
                     case Level::empty:
                         break;
                     case Level::smart_zombie:
-                        //TODO: Spawn a Smart Zombie
+                        m_actors.push_back(new SmartZombie(this, startX, startY));
                         break;
                     case Level::dumb_zombie:
-                        //TODO: Spawn a Dumb Zombie
+                        m_actors.push_back(new SmartZombie(this, startX, startY));
                         break;
                     case Level::player:
                         m_penelope = new Penelope(this, startX, startY);
@@ -67,9 +67,8 @@ void StudentWorld::loadLevel(int level){
                     case Level::pit:
                         m_actors.push_back(new Pit(this, startX, startY));
                         break;
-                        // etc…
                     case Level::citizen:
-                        //TODO: Spawn a Citizen
+                        m_actors.push_back(new Citizen(this, startX, startY));
                         break;
                     case Level::vaccine_goodie:
                         m_actors.push_back(new VaccineGoodie(this, startX, startY));
@@ -164,11 +163,19 @@ Actor* StudentWorld::getActorAt(double x, double y)
     return nullptr;
 }
 
-bool StudentWorld::doesBlockMovement(double x, double y)
+bool StudentWorld::doesBlockMovement(double x, double y, Actor* actor)
 {
+    if (actor != m_penelope)
+    {
+        if ((x + SPRITE_WIDTH - 1 >= m_penelope->getX()  && y + SPRITE_HEIGHT - 1 >= m_penelope->getY()) || (m_penelope->getX() + SPRITE_WIDTH - 1 >= x && m_penelope->getY() + SPRITE_HEIGHT - 1 >=y))
+            return true;
+    }
+    
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
-        int posX = (*iter)->getX(), posY = (*iter)->getY();
+        double posX = (*iter)->getX(), posY = (*iter)->getY();
+        if (*iter == actor)
+            continue;
         if (!(*iter)->isBlocked())
             continue;
         if (x + SPRITE_WIDTH - 1 < posX || posX + SPRITE_WIDTH - 1 < x)
@@ -177,6 +184,7 @@ bool StudentWorld::doesBlockMovement(double x, double y)
             continue;
         return true;
     }
+
     return false;
 }
 
@@ -204,10 +212,9 @@ StudentWorld::~StudentWorld()
     cleanUp();
 }
 
-Actor* StudentWorld::getClosestZombie(double x, double y)
+double StudentWorld::getClosestZombie(double x, double y)
 {
-    Actor* temp = nullptr;
-    double distance = 0;
+    double distance = 9999999; //really large starting distance
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
         if ((*iter)->getType() == ActorType::e_zombie)
@@ -215,11 +222,33 @@ Actor* StudentWorld::getClosestZombie(double x, double y)
             if ((*iter)->distance(x, y) < distance)
             {
                 distance = (*iter)->distance(x, y);
-                temp = *iter;
             }
         }
     }
-    return temp;
+    if (distance == 99999)
+        return -1;
+    return distance;
+}
+
+double StudentWorld::getClosestHuman(double x, double y) 
+{
+    double distance = 9999999; //really large starting distance
+    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+    {
+        if ((*iter)->getType() == ActorType::e_human)
+        {
+            if ((*iter)->distance(x, y) < distance)
+            {
+                distance = (*iter)->distance(x, y);
+            }
+        }
+    }
+    
+    if (distance > m_penelope->distance(x, y))
+        
+    if (distance == 99999)
+        return -1;
+    return distance;
 }
 
 //Score: 004500  Level: 27  Lives: 3  Vaccines:    2        Flames:    16        Mines:    1        Infected:    0
