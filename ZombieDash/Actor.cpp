@@ -7,7 +7,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////
 //                           Actor                           //
 ///////////////////////////////////////////////////////////////
-Actor::Actor(StudentWorld* sw, int imageID, double startX, double startY, Direction dir, int depth):m_world(sw),m_alive(true),GraphObject(imageID, startX, startY, dir, depth, 1.0)
+Actor::Actor(StudentWorld* sw, int imageID, double startX, double startY, Direction dir, int depth):m_world(sw),m_alive(true),m_tickCount(1),GraphObject(imageID, startX, startY, dir, depth, 1.0)
 {
     
 }
@@ -47,6 +47,21 @@ double Actor::distance(double x, double y) const
     return sqrt((getX()-x)*(getX()-x)+(getY()-y)*(getY()-y));
 }
 
+void Actor::increaseTickCount()
+{
+    m_tickCount++;
+}
+
+int Actor::getTickCount() const
+{
+    return m_tickCount;
+}
+
+bool Actor::isEvenTick() const
+{
+    return m_tickCount%2 == 0;
+}
+
 ///////////////////////////////////////////////////////////////
 //                      BlockMovement                        //
 ///////////////////////////////////////////////////////////////
@@ -66,35 +81,62 @@ bool BlockMovement::isBlocked() const
 ///////////////////////////////////////////////////////////////
 //                         Human                             //
 ///////////////////////////////////////////////////////////////
-Human::Human(StudentWorld* sw, int imageID, double startX, double startY):BlockMovement(sw, imageID, startX, startY){}
+Human::Human(StudentWorld* sw, int imageID, double startX, double startY):m_infected(false),m_infectCount(0),BlockMovement(sw, imageID, startX, startY){}
 
 ActorType Human::getType() const
 {
     return ActorType::e_human;
 }
 
+void Human::increaseInfectCount(int num)
+{
+    m_infectCount++;
+}
+
+int Human::getInfectCount() const
+{
+    return m_infectCount;
+}
+
+void Human::getInfected()
+{
+    m_infected = true;
+}
+
+bool Human::isInfected() const
+{
+    return m_infected;
+}
+
+
 ///////////////////////////////////////////////////////////////
 //                         Citizen                           //
 ///////////////////////////////////////////////////////////////
-Citizen::Citizen(StudentWorld* sw, double startX, double startY):m_infectCount(0),m_infected(false),m_tickCount(0),Human(sw, IID_CITIZEN, startX, startY)
+Citizen::Citizen(StudentWorld* sw, double startX, double startY):Human(sw, IID_CITIZEN, startX, startY)
 {}
 
 void Citizen::doSomething()
 {
     if (!isAlive())
         return;
-    if (m_infected)
-        m_infectCount++;
-    if (m_infectCount >= 500)
+    if (isInfected())
+        increaseInfectCount(1);
+    if (getInfectCount() >= 500)
     {
         setDead();
         this->getWorld()->playSound(SOUND_ZOMBIE_BORN);
         this->getWorld()->increaseScore(-1000);
-        //TODO: add a zombie into the world;
+        int rand = randInt(1, 10);
+        if  (rand <= 3)
+        {
+            this->getWorld()->addActor(new SmartZombie(this->getWorld(),getX(), getY()));
+        }
+        else
+            this->getWorld()->addActor(new DumbZombie(this->getWorld(),getX(), getY()));
         return;
     }
-    m_tickCount++;
-    if (m_tickCount%2 == 0)
+    increaseTickCount();
+    if (isEvenTick())
         return;
     double currX = this->getX();
     double currY = this->getY();
@@ -439,7 +481,7 @@ void Wall::doSomething()
 //                           Penelope                        //
 ///////////////////////////////////////////////////////////////
 
-Penelope::Penelope(StudentWorld* sw, double startX, double startY):m_flameCount(0),m_infectCount(0),m_vaccineCount(0),m_landmineCount(0),Human(sw, IID_PLAYER, startX, startY)
+Penelope::Penelope(StudentWorld* sw, double startX, double startY):m_flameCount(0),m_vaccineCount(0),m_landmineCount(0),Human(sw, IID_PLAYER, startX, startY)
 {
     //TODO: finish
 }
@@ -453,17 +495,75 @@ void Penelope::throwFlame()
 {
     if (m_flameCount <= 0)
         return;
+    
     m_flameCount--;
     getWorld()->playSound(SOUND_PLAYER_FIRE);
-    for (int i = 0;i<3;i++)
+    int dir = this->getWorld()->getPenelope()->getDirection();
+//    for (int i = 1;i<4;i++)
+//    {
+//        //TODO: generate three flames
+//        switch (dir)
+//        {
+//            case up:
+//                if (!this->getWorld()->doesBlockMovement(this->getX(), this->getY()+i*SPRITE_HEIGHT, this))
+//                    this->getWorld()->addActor(new Flame(this->getWorld(),this->getX(), this->getY()+i*SPRITE_HEIGHT));
+//                else
+//                    continue;
+//                break;
+//            case down:
+//                if (!this->getWorld()->doesBlockMovement(this->getX(), this->getY()-i*SPRITE_HEIGHT, this))
+//                    this->getWorld()->addActor(new Flame(this->getWorld(),this->getX(), this->getY()-i*SPRITE_HEIGHT));
+//                else
+//                        continue;
+//                break;
+//            case left:
+//                if (!this->getWorld()->doesBlockMovement(this->getX()-i*SPRITE_WIDTH, this->getY(), this))
+//                    this->getWorld()->addActor(new Flame(this->getWorld(),this->getX()-i*SPRITE_WIDTH, this->getY()));
+//                else
+//                    continue;
+//                break;
+//            case right:
+//                if (!this->getWorld()->doesBlockMovement(this->getX()+i*SPRITE_WIDTH, this->getY(), this))
+//                    this->getWorld()->addActor(new Flame(this->getWorld(),this->getX()+i*SPRITE_WIDTH, this->getY()));
+//                else
+//                    continue;
+//                break;
+//            default:
+//                break;
+//        }
+//    }
+    switch (dir)
     {
-        //TODO: generate three flames
+        case up:
+            for (int i = 1;i<4;i++)
+            if (!this->getWorld()->doesBlockMovement(this->getX(), this->getY()+i*SPRITE_HEIGHT, this))
+                this->getWorld()->addActor(new Flame(this->getWorld(),this->getX(), this->getY()+i*SPRITE_HEIGHT));
+            else
+                break;
+            break;
+        case down:
+            for (int i = 1;i<4;i++)
+            if (!this->getWorld()->doesBlockMovement(this->getX(), this->getY()-i*SPRITE_HEIGHT, this))
+                this->getWorld()->addActor(new Flame(this->getWorld(),this->getX(), this->getY()-i*SPRITE_HEIGHT));
+            else
+                break;
+            break;
+        case left:
+            for (int i = 1;i<4;i++)
+            if (!this->getWorld()->doesBlockMovement(this->getX()-i*SPRITE_WIDTH, this->getY(), this))
+                this->getWorld()->addActor(new Flame(this->getWorld(),this->getX()-i*SPRITE_WIDTH, this->getY()));
+            else
+                break;
+            break;
+        case right:
+            for (int i = 1;i<4;i++)
+            if (!this->getWorld()->doesBlockMovement(this->getX()+i*SPRITE_WIDTH, this->getY(), this))
+                this->getWorld()->addActor(new Flame(this->getWorld(),this->getX()+i*SPRITE_WIDTH, this->getY()));
+            else
+                break;
+        
+            break;
     }
-}
-
-bool Penelope::isInfected() const
-{
-    return m_infectCount>0;
 }
 
 bool Penelope::isAlive() const
@@ -492,9 +592,9 @@ void Penelope::doSomething()
         return;
     if (isInfected())
     {
-        m_infectCount++;
+        increaseInfectCount(1);
     }
-    if (m_infectCount >= 500)
+    if (getInfectCount() >= 500)
     {
         setDead();
         getWorld()->playSound(SOUND_PLAYER_DIE);
@@ -558,10 +658,10 @@ int Penelope::getFlameCount() const
     return m_flameCount;
 }
 
-int Penelope::getInfectCount() const
-{
-    return m_infectCount;
-}
+//int Penelope::getInfectCount() const
+//{
+//    return m_infectCount;
+//}
 
 int Penelope::getVaccineCount() const
 {
@@ -635,7 +735,7 @@ void Projectile::doSomething()
 ///////////////////////////////////////////////////////////////
 //                         Flame                             //
 ///////////////////////////////////////////////////////////////
-Flame::Flame(StudentWorld* sw, double startX, double startY):m_tickCount(0),Projectile(sw, IID_FLAME, startX, startY)
+Flame::Flame(StudentWorld* sw, double startX, double startY):Projectile(sw, IID_FLAME, startX, startY)
 {
     
 }
@@ -647,12 +747,36 @@ ActorType Flame::getType() const
 
 void Flame::doSomething()
 {
-    m_tickCount++;
-    if (m_tickCount == 2)
+    if (getTickCount() == 2)
         setDead();
+    increaseTickCount();
     if (!isAlive())
         return;
-    //TODO: finish
+    Actor* actor = this->getWorld()->getActorAt(getX(), getY());
+    if (!actor)
+        return;
+    if (actor->getType() == ActorType::e_penelope)
+        return;
+    if (actor->getType() == ActorType::e_goodie)
+    {
+        actor->setDead();
+    }
+    if (actor->getType() == ActorType::e_zombie)
+    {
+        actor->setDead();
+        this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
+        this->getWorld()->increaseScore(1000);
+    }
+    if (actor->getType() == ActorType::e_landmine)
+    {
+        //TODO: finish this part: burning the landmine, all that type of stuff
+    }
+    if (actor->getType() == ActorType::e_human)
+    {
+        actor->setDead();
+        this->getWorld()->playSound(SOUND_CITIZEN_DIE);
+        this->getWorld()->increaseScore(-1000);
+    }
 }
 
 ///////////////////////////////////////////////////////////////
@@ -687,7 +811,11 @@ DumbZombie::DumbZombie(StudentWorld* sw, double startX, double startY):Zombie(sw
 void DumbZombie::doSomething()
 {
     //TODO: finish
+    
+    increaseTickCount();
     if (!isAlive())
+        return;
+    if (isEvenTick())
         return;
     
 }
@@ -704,5 +832,10 @@ void SmartZombie::doSomething()
 {
     //TODO: finish
 }
+
+///////////////////////////////////////////////////////////////
+//                       Landmine                            //
+///////////////////////////////////////////////////////////////
+
 
 

@@ -85,6 +85,11 @@ void StudentWorld::loadLevel(int level){
     }
 }
 
+void StudentWorld::addActor(Actor* actor)
+{
+    m_actors.push_back(actor);
+}
+
 int StudentWorld::move()
 {
     // This code is here merely to allow the game to build, run, and terminate after you hit enter.
@@ -110,6 +115,7 @@ int StudentWorld::move()
 //            if ()
 //                return GWSTATUS_FINISHED_LEVEL;
         }
+    }
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();)
         {
             //TODO: finish this shit
@@ -120,9 +126,22 @@ int StudentWorld::move()
                 tempIter = nullptr;
                 m_actors.erase(iter);
             }
-            iter++;
+            else
+                iter++;
         }
-    }
+    //
+    
+//    vector<Actor*>::iterator iter = m_actors.begin();
+//        while (iter!=m_actors.end())
+//        {
+//            if (*iter && !(*iter)->isAlive())
+//            {
+//                Actor* tempIter = *iter;
+//                delete tempIter;
+//                tempIter = nullptr;
+//                m_actors.erase(iter);
+//            }
+//        }
     // Update the game status line
     //    Update Display Text
     // update the score/lives/level text at screen top
@@ -171,11 +190,14 @@ bool StudentWorld::doesBlockMovement(double x, double y, Actor* actor)
             return true;
     }
     
+    //TODO: fix the interaction between Flame with Citizen
+    
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
         double posX = (*iter)->getX(), posY = (*iter)->getY();
         if (*iter == actor)
             continue;
+        
         if (!(*iter)->isBlocked())
             continue;
         if (x + SPRITE_WIDTH - 1 < posX || posX + SPRITE_WIDTH - 1 < x)
@@ -217,7 +239,7 @@ double StudentWorld::getClosestZombie(double x, double y)
     double distance = 9999999; //really large starting distance
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
-        if ((*iter)->getType() == ActorType::e_zombie)
+        if (distance == -1 || (*iter)->getType() == ActorType::e_zombie)
         {
             if ((*iter)->distance(x, y) < distance)
             {
@@ -225,19 +247,17 @@ double StudentWorld::getClosestZombie(double x, double y)
             }
         }
     }
-    if (distance == 99999)
-        return -1;
     return distance;
 }
 
 double StudentWorld::getClosestHuman(double x, double y) 
 {
-    double distance = 9999999; //really large starting distance
+    double distance = -1; //really large starting distance
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
         if ((*iter)->getType() == ActorType::e_human)
         {
-            if ((*iter)->distance(x, y) < distance)
+            if (distance == -1 || (*iter)->distance(x, y) < distance)
             {
                 distance = (*iter)->distance(x, y);
             }
@@ -245,9 +265,7 @@ double StudentWorld::getClosestHuman(double x, double y)
     }
     
     if (distance > m_penelope->distance(x, y))
-        
-    if (distance == 99999)
-        return -1;
+        distance = m_penelope->distance(x, y);
     return distance;
 }
 

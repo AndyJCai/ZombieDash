@@ -25,6 +25,7 @@ public:
 //    Actor* collides(Actor* actor);
     Penelope* getPenelope();
     void updateGameStats();
+    void addActor(Actor* actor);
     double getClosestZombie(double x, double y);
     double getClosestHuman(double x, double y);
 

@@ -9,7 +9,7 @@
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
 enum ActorType {
-    e_penelope, e_actor, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame, e_zombie, e_human, e_projectile
+    e_penelope, e_actor, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame, e_zombie, e_human, e_projectile, e_landmine, e_vomit
 };
 
 class StudentWorld;
@@ -27,9 +27,13 @@ public:
     virtual bool overlap(Actor* otherActor) const;
     void setDead();
     double distance(double x, double y) const;
+    void increaseTickCount();
+    int getTickCount() const;
+    bool isEvenTick() const;
 private:
     StudentWorld* m_world;
     bool m_alive;
+    int m_tickCount;
     
 };
 
@@ -39,7 +43,6 @@ public:
     BlockMovement(StudentWorld* sw, int imageID, double startX, double startY);
     virtual bool isBlocked() const;
     virtual ActorType getType() const;
-private:
 };
 
 class Human : public BlockMovement //Citizen, Penelope
@@ -47,6 +50,13 @@ class Human : public BlockMovement //Citizen, Penelope
 public:
     Human(StudentWorld* sw, int imageID, double startX, double startY);
     virtual ActorType getType() const;
+    int getInfectCount() const;
+    void increaseInfectCount(int num);
+    void getInfected();
+    bool isInfected() const;
+private:
+    int m_infectCount;
+    bool m_infected;
 };
 
 class Goodie : public Actor //Goodies
@@ -62,10 +72,6 @@ class Citizen: public Human
 public:
     Citizen(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
-private:
-    int m_infectCount;
-    int m_tickCount;
-    bool m_infected;
 };
 
 class Wall : public BlockMovement
@@ -83,7 +89,7 @@ public:
     virtual void doSomething();
     virtual ActorType getType() const;
     bool isAlive() const;
-    bool isInfected() const;
+//    bool isInfected() const;
     void throwFlame();
     void changeVaccine(int num);
     void changeGas(int num);
@@ -91,11 +97,11 @@ public:
     int getFlameCount() const;
     int getVaccineCount() const;
     int getLandmineCount() const;
-    int getInfectCount() const;
+//    int getInfectCount() const;
     
 private:
     int m_flameCount;
-    int m_infectCount;
+//    int m_infectCount;
     int m_vaccineCount;
     int m_landmineCount;
 };
@@ -155,8 +161,14 @@ public:
     Flame(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
     virtual ActorType getType() const;
-private:
-    int m_tickCount;
+};
+
+class Vomit : public Projectile
+{
+public:
+    Vomit(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+    virtual ActorType getType() const;
 };
 
 class Zombie : public BlockMovement
@@ -178,6 +190,13 @@ class SmartZombie : public Zombie
 {
 public:
     SmartZombie(StudentWorld* sw, double startX, double startY);
+    virtual void doSomething();
+};
+
+class Landmine : public Actor
+{
+public:
+    Landmine(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
 };
 
