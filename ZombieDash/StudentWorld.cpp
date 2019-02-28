@@ -279,9 +279,9 @@ double StudentWorld::getClosestZombie(double x, double y)
     double distance = -1; //really large starting distance
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
-        if (distance == -1 || (*iter)->getType() == ActorType::e_zombie)
+        if ((*iter)->getType() == ActorType::e_zombie)
         {
-            if ((*iter)->distance(x, y) < distance)
+            if (distance == -1 || (*iter)->distance(x, y) < distance)
             {
                 distance = (*iter)->distance(x, y);
             }
@@ -290,8 +290,9 @@ double StudentWorld::getClosestZombie(double x, double y)
     return distance;
 }
 
-double StudentWorld::getClosestHuman(double x, double y) 
+Actor* StudentWorld::getClosestHuman(double x, double y)
 {
+    Actor* temp_human = nullptr;
     double distance = -1; //really large starting distance
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
@@ -300,13 +301,17 @@ double StudentWorld::getClosestHuman(double x, double y)
             if (distance == -1 || (*iter)->distance(x, y) < distance)
             {
                 distance = (*iter)->distance(x, y);
+                temp_human = *iter;
             }
         }
     }
     
     if (distance > m_penelope->distance(x, y))
+    {
         distance = m_penelope->distance(x, y);
-    return distance;
+        temp_human = m_penelope;
+    }
+    return temp_human;
 }
 
 int StudentWorld::numberOfCitizensLeft()

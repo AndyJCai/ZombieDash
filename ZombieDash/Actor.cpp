@@ -964,6 +964,89 @@ void SmartZombie::doSomething()
     increaseTickCount();
     if (isEvenTick())
         return;
+    double currX = getX(), currY = getY();
+    double vomitX = 0, vomitY = 0;
+    switch (this->getDirection()) {
+        case right:
+            vomitX = currX+SPRITE_WIDTH;
+            vomitY= currY;
+            break;
+        case left:
+            vomitX = currX - SPRITE_WIDTH;
+            vomitY = currY;
+            break;
+        case up:
+            vomitX = currX;
+            vomitY = currY+SPRITE_HEIGHT;
+            break;
+        case down:
+            vomitX = currX;
+            vomitY = currY-SPRITE_HEIGHT;
+            break;
+        default:
+            break;
+    }
+    StudentWorld* currW = this->getWorld();
+    if (currW->isHumanInfrontOfZombie(vomitX, vomitY, this->getDirection()) && randInt(1, 3) == 1)
+    {
+        currW->addActor(new Vomit(currW, vomitX, vomitY));
+        currW->playSound(SOUND_ZOMBIE_VOMIT);
+        return;
+    }
+    
+    if (getMovementPlan() == 0)
+    {
+        setMPlan(randInt(3, 10));
+        Actor* closest_human = currW->getClosestHuman(currX, currY);
+        double humanX = closest_human->getX(), humanY = closest_human->getY();
+        double dist_human = this->distance(humanX, humanY);
+        if (dist_human > 80)
+        {
+            this->setDirection(randInt(0, 3)*90);
+        }
+        else
+        {
+            if (currX == humanX)
+            {
+                if (currY<humanY)
+                    this->setDirection(up);
+                else
+                    this->setDirection(down);
+            }
+            else if (currY == humanY)
+            {
+                if (currX<humanX)
+                    this->setDirection(right);
+                else
+                    this->setDirection(left);
+            }
+        }
+    }
+    double dist_x = 0, dist_y = 0;
+    switch (this->getDirection()) {
+        case right:
+            dist_x = 1;
+            break;
+        case left:
+            dist_x = -1;
+            break;
+        case up:
+            dist_y = 1;
+            break;
+        case down:
+            dist_y = -1;
+            break;
+        default:
+            break;
+    }
+    if (!currW->doesBlockMovement(currX+dist_x, currY+dist_y, this))
+    {
+        //        cout<<"dist_x "<<dist_x<<" dist_y "<<dist_y<<endl;
+        this->moveTo(currX+dist_x, currY+dist_y);
+        decrementMPlan();
+    }
+    else
+        setMPlan(0);
     
 }
 

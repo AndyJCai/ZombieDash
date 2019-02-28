@@ -29,7 +29,7 @@ public:
     void updateGameStats();
     void addActor(Actor* actor);
     double getClosestZombie(double x, double y);
-    double getClosestHuman(double x, double y);
+    Actor* getClosestHuman(double x, double y);
     int numberOfCitizensLeft();
     void exitIsSteppedOn(bool isSteppedOn);
     bool isHumanInfrontOfZombie(double x, double y, int direction);
