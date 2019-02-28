@@ -22,6 +22,7 @@ bool Actor::isBlocked() const
     return false;
 }
 
+//Inputs another 
 bool Actor::overlap(Actor* otherActor) const
 {
     return sqrt((getX()-otherActor->getX())*(getX()-otherActor->getX())+(getY()-otherActor->getY())*(getY()-otherActor->getY()))<=10;
@@ -871,17 +872,47 @@ void DumbZombie::doSomething()
 {
     if (!isAlive())
         return;
+    
+    double currX = getX(), currY = getY();
     Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
     if (actor && actor->getType() == e_flame)
     {
         this->setDead();
         this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
         this->getWorld()->increaseScore(1000);
+        if (randInt(1, 10) == 1)
+        {
+            //Drop Vaccine Goodie
+            //When a dumb zombie drops a vaccine goodie, it does not simply drop it at its own (x,y) coordinates, but tries to fling it away instead: It chooses a random direction, computes the coordinates SPRITE_WIDTH units away if the direction is left or right or SPRITE_HEIGHT units away if it is up or down, and if no other object in the game would overlap with an object created at those coordinates, introduces a new vaccine goodie at those coordinates; otherwise, it does not introduce a vaccine object.
+            int randDir = randInt(0, 3)*90;
+            double vacX = 0, vacY = 0;
+            switch (randDir) {
+                case right:
+                    vacX = currX+SPRITE_WIDTH;
+                    vacY= currY;
+                    break;
+                case left:
+                    vacX = currX - SPRITE_WIDTH;
+                    vacY = currY;
+                    break;
+                case up:
+                    vacX = currX;
+                    vacY = currY+SPRITE_HEIGHT;
+                    break;
+                case down:
+                    vacX = currX;
+                    vacY = currY-SPRITE_HEIGHT;
+                    break;
+                default:
+                    break;
+            }
+            if (!this->getWorld()->doesBlockGoodie(vacX, vacY))
+                this->getWorld()->addActor(new VaccineGoodie(this->getWorld(), vacX, vacY));
+        }
     }
     increaseTickCount();
     if (isEvenTick())
         return;
-    double currX = getX(), currY = getY();
     double vomitX = 0, vomitY = 0;
     switch (this->getDirection()) {
         case right:

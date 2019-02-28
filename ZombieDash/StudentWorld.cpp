@@ -33,7 +33,7 @@ void StudentWorld::loadLevel(int level){
     string levelStr = to_string(level);
     levelStr = level < 10 ? "0"+levelStr : levelStr;
     string levelFile = "level"+levelStr+".txt";
-//    string levelFile = "level04.txt";
+//    string levelFile = "level03.txt";
     Level::LoadResult result = lev.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found)
         cerr << "Cannot find"<<levelFile<<" data file" << endl;
@@ -113,36 +113,19 @@ int StudentWorld::move()
         //LEVEL COMPLETE
         if(numberOfCitizensLeft() == 0 && m_exitIsSteppedOn){
             playSound(SOUND_LEVEL_FINISHED);
+            //PLAYER WON
+            if (getLevel() == 6)
+                return GWSTATUS_PLAYER_WON;
             return GWSTATUS_FINISHED_LEVEL;
         }
-        
-        
     }
     //CLEANUP ALL THE ACTORS
-//    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();)
-//        {
-//            if (*iter && !(*iter)->isAlive())
-//            {
-//                Actor* tempIter = *iter;
-//                delete tempIter;
-//                tempIter = nullptr;
-//                m_actors.erase(iter);
-//            }
-//            else
-//                iter++;
-//        }
-    
     vector<Actor*>::iterator it = m_actors.begin();
 
     while(it != m_actors.end()){
         if(!(*it)->isAlive()){
-            if ((*it)->getType() == e_human)
-            {
-                cout<<"Citizen being deleted"<<endl;
-            }
             delete *it;
             it = m_actors.erase(it);
-            
         }
         else{
             it++;
@@ -163,16 +146,6 @@ void StudentWorld::cleanUp()
             *iter = nullptr;
         }
     }
-//    if (m_penelope != nullptr)
-//    vector<Actor*>::iterator it;
-//
-//    it = m_actors.begin();
-//
-//    while(it != m_actors.end())
-//    {
-//        delete *it;
-//        it++;
-//    }
     delete m_penelope;
     m_penelope = nullptr;
 }
@@ -240,6 +213,20 @@ bool StudentWorld::doesBlockFire(double x, double y)
             continue;
         if (!(*iter)->isBlocked())
             continue;
+        if (x + SPRITE_WIDTH - 1 < posX || posX + SPRITE_WIDTH - 1 < x)
+            continue;
+        if (y + SPRITE_HEIGHT - 1 < posY || posY + SPRITE_HEIGHT - 1 < y)
+            continue;
+        return true;
+    }
+    return false;
+}
+
+bool StudentWorld::doesBlockGoodie(double x, double y)
+{
+    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+    {
+        double posX = (*iter)->getX(), posY = (*iter)->getY();
         if (x + SPRITE_WIDTH - 1 < posX || posX + SPRITE_WIDTH - 1 < x)
             continue;
         if (y + SPRITE_HEIGHT - 1 < posY || posY + SPRITE_HEIGHT - 1 < y)

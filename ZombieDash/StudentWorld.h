@@ -23,6 +23,7 @@ public:
     void loadLevel(int level);
     bool doesBlockMovement(double x, double y, Actor* actor); //Makes sure objects don't overstep on each other
     bool doesBlockFire(double x, double y);
+    bool doesBlockGoodie(double x, double y);
     Actor* doesOverlapWithAnyActor(Actor* notThisActor);
 //    Actor* collides(Actor* actor);
     Penelope* getPenelope();
