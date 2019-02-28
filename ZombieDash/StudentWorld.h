@@ -2,6 +2,7 @@
 #define STUDENTWORLD_H_
 
 #include "GameWorld.h"
+#include "Actor.h"
 #include <string>
 #include <vector>
 
@@ -21,17 +22,22 @@ public:
     void setPenelope(Penelope* p);
     void loadLevel(int level);
     bool doesBlockMovement(double x, double y, Actor* actor); //Makes sure objects don't overstep on each other
-    Actor* getActorAt(double x, double y);
+    bool doesBlockFire(double x, double y);
+    Actor* doesOverlapWithAnyActor(Actor* notThisActor);
 //    Actor* collides(Actor* actor);
     Penelope* getPenelope();
     void updateGameStats();
     void addActor(Actor* actor);
     double getClosestZombie(double x, double y);
     double getClosestHuman(double x, double y);
+    int numberOfCitizensLeft();
+    void exitIsSteppedOn(bool isSteppedOn);
+    bool isHumanInfrontOfZombie(double x, double y, int direction);
 
 private:
     std::vector<Actor*> m_actors;
     Penelope* m_penelope;
+    bool m_exitIsSteppedOn;
 };
 
 #endif // STUDENTWORLD_H_

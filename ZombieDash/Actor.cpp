@@ -90,7 +90,7 @@ ActorType Human::getType() const
 
 void Human::increaseInfectCount(int num)
 {
-    m_infectCount++;
+    m_infectCount+=num;
 }
 
 int Human::getInfectCount() const
@@ -101,6 +101,12 @@ int Human::getInfectCount() const
 void Human::getInfected()
 {
     m_infected = true;
+    m_infectCount++;
+}
+
+void Human::getCured()
+{
+    m_infected = false;
 }
 
 bool Human::isInfected() const
@@ -117,10 +123,27 @@ Citizen::Citizen(StudentWorld* sw, double startX, double startY):Human(sw, IID_C
 
 void Citizen::doSomething()
 {
+    //TODO: finish this because the zombies are turning really quickly
     if (!isAlive())
         return;
     if (isInfected())
         increaseInfectCount(1);
+    Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
+    if (actor)
+    {
+        if (actor->getType() == ActorType::e_vomit)
+        {
+            this->getInfected();
+            this->getWorld()->playSound(SOUND_CITIZEN_INFECTED);
+        }
+        else if (actor->getType() ==ActorType::e_flame)
+        {
+            this->setDead();
+            this->getWorld()->playSound(SOUND_CITIZEN_DIE);
+            this->getWorld()->increaseScore(-1000);
+        }
+    }
+    //Following code checks the interaction with vomit
     if (getInfectCount() >= 500)
     {
         setDead();
@@ -156,47 +179,45 @@ void Citizen::doSomething()
                 int dir = -1;
                 if (currX > p->getX())
                     dir = left;
-                else if (currX < p->getX())
+                else
                     dir = right;
                 if (currY > p->getY())
                     dir = down;
-                else if (currY < p->getY())
+                else
                     dir = up;
                 switch (dir)
                 {
                     case right:
                         if (!getWorld()->doesBlockMovement(currX+2, currY, this))
                         {
+//                            cout<<"right called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX+2, currY);
                             return;
                         }
                         break;
                     case up:
-                        
-                        this->setDirection(dir);
                         if (!getWorld()->doesBlockMovement(currX, currY+2, this))
                         {
+//                            cout<<"up called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY+2);
                             return;
                         }
                         break;
                     case left:
-                        
-                        this->setDirection(dir);
                         if (!getWorld()->doesBlockMovement(currX-2, currY, this))
                         {
+//                            cout<<"left called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX-2, currY);
                             return;
                         }
                         break;
                     case down:
-                        
-                        this->setDirection(dir);
                         if (!getWorld()->doesBlockMovement(currX, currY-2, this))
                         {
+//                            cout<<"down called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY-2);
                             return;
@@ -212,12 +233,13 @@ void Citizen::doSomething()
                 int dir1 = p->getX() > currX ? right: left;
                 int dir2 = p->getY() > currY ? up : down;
                 int dir = rand == 0 ? dir1 : dir2;
-                int otherDir = rand == 1 ? dir2 : dir1;
+//                int otherDir = rand == 0 ? dir2 : dir1;
                 switch (dir)
                 {
                     case right:
                         if (!getWorld()->doesBlockMovement(currX+2, currY, this))
                         {
+                            cout<<"right 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX+2, currY);
                             return;
@@ -226,14 +248,17 @@ void Citizen::doSomething()
                     case up:
                         if (!getWorld()->doesBlockMovement(currX, currY+2, this))
                         {
+                            cout<<"up 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY+2);
                             return;
                         }
                         break;
                     case left:
+                        
                         if (!getWorld()->doesBlockMovement(currX-2, currY, this))
                         {
+                            cout<<"left 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX-2, currY);
                             return;
@@ -242,6 +267,7 @@ void Citizen::doSomething()
                     case down:
                         if (!getWorld()->doesBlockMovement(currX, currY-2, this))
                         {
+                            cout<<"down 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY-2);
                             return;
@@ -250,44 +276,48 @@ void Citizen::doSomething()
                     default:
                         break;
                 }
-                dir = otherDir;
-                switch (dir)
-                {
-                    case right:
-                        if (!getWorld()->doesBlockMovement(currX+2, currY, this))
-                        {
-                            this->setDirection(dir);
-                            this->moveTo(currX+2, currY);
-                            return;
-                        }
-                        break;
-                    case up:
-                        if (!getWorld()->doesBlockMovement(currX, currY+2, this))
-                        {
-                            this->setDirection(dir);
-                            this->moveTo(currX, currY+2);
-                            return;
-                        }
-                        break;
-                    case left:
-                        if (!getWorld()->doesBlockMovement(currX-2, currY, this))
-                        {
-                            this->setDirection(dir);
-                            this->moveTo(currX-2, currY);
-                            return;
-                        }
-                        break;
-                    case down:
-                        if (!getWorld()->doesBlockMovement(currX, currY-2, this))
-                        {
-                            this->setDirection(dir);
-                            this->moveTo(currX, currY-2);
-                            return;
-                        }
-                        break;
-                    default:
-                        break;
-                }
+//                dir = otherDir;
+//                switch (dir)
+//                {
+//                    case right:
+//                        if (!getWorld()->doesBlockMovement(currX+2, currY, this))
+//                        {
+//                            cout<<"right 3 called"<<endl;
+//                            this->setDirection(dir);
+//                            this->moveTo(currX+2, currY);
+//                            return;
+//                        }
+//                        break;
+//                    case up:
+//                        if (!getWorld()->doesBlockMovement(currX, currY+2, this))
+//                        {
+//                            cout<<"up 3 called"<<endl;
+//                            this->setDirection(dir);
+//                            this->moveTo(currX, currY+2);
+//                            return;
+//                        }
+//                        break;
+//                    case left:
+//                        if (!getWorld()->doesBlockMovement(currX-2, currY, this))
+//                        {
+//                            cout<<"left 3 called"<<endl;
+//                            this->setDirection(dir);
+//                            this->moveTo(currX-2, currY);
+//                            return;
+//                        }
+//                        break;
+//                    case down:
+//                        if (!getWorld()->doesBlockMovement(currX, currY-2, this))
+//                        {
+//                            cout<<"down 3 called"<<endl;
+//                            this->setDirection(dir);
+//                            this->moveTo(currX, currY-2);
+//                            return;
+//                        }
+//                        break;
+//                    default:
+//                        break;
+//                }
             }
         }
         else if (dist_z <= 80)
@@ -386,6 +416,11 @@ Goodie::Goodie(StudentWorld* sw, int imageID, double startX, double startY):Acto
 
 void Goodie::doSomething()
 {
+    Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
+    if (actor && actor->getType() == e_flame)
+    {
+        this->setDead();
+    }
 }
 
 ActorType Goodie::getType() const
@@ -406,6 +441,7 @@ void VaccineGoodie::doSomething()
 {
     if (!isAlive())
     return;
+    Goodie::doSomething();
     StudentWorld* currWorld = this->getWorld();
     if (!currWorld->getPenelope()->overlap(this))
         return;
@@ -430,6 +466,7 @@ void GasCanGoodie::doSomething()
 {
     if (!isAlive())
         return;
+    Goodie::doSomething();
     StudentWorld* currWorld = this->getWorld();
     if (!currWorld->getPenelope()->overlap(this))
         return;
@@ -451,7 +488,8 @@ LandmineGoodie::LandmineGoodie(StudentWorld* sw, double startX, double startY):G
 void LandmineGoodie::doSomething()
 {
     if (!isAlive())
-    return;
+        return;
+    Goodie::doSomething();
     StudentWorld* currWorld = this->getWorld();
     if (!currWorld->getPenelope()->overlap(this))
         return;
@@ -499,65 +537,32 @@ void Penelope::throwFlame()
     m_flameCount--;
     getWorld()->playSound(SOUND_PLAYER_FIRE);
     int dir = this->getWorld()->getPenelope()->getDirection();
-//    for (int i = 1;i<4;i++)
-//    {
-//        //TODO: generate three flames
-//        switch (dir)
-//        {
-//            case up:
-//                if (!this->getWorld()->doesBlockMovement(this->getX(), this->getY()+i*SPRITE_HEIGHT, this))
-//                    this->getWorld()->addActor(new Flame(this->getWorld(),this->getX(), this->getY()+i*SPRITE_HEIGHT));
-//                else
-//                    continue;
-//                break;
-//            case down:
-//                if (!this->getWorld()->doesBlockMovement(this->getX(), this->getY()-i*SPRITE_HEIGHT, this))
-//                    this->getWorld()->addActor(new Flame(this->getWorld(),this->getX(), this->getY()-i*SPRITE_HEIGHT));
-//                else
-//                        continue;
-//                break;
-//            case left:
-//                if (!this->getWorld()->doesBlockMovement(this->getX()-i*SPRITE_WIDTH, this->getY(), this))
-//                    this->getWorld()->addActor(new Flame(this->getWorld(),this->getX()-i*SPRITE_WIDTH, this->getY()));
-//                else
-//                    continue;
-//                break;
-//            case right:
-//                if (!this->getWorld()->doesBlockMovement(this->getX()+i*SPRITE_WIDTH, this->getY(), this))
-//                    this->getWorld()->addActor(new Flame(this->getWorld(),this->getX()+i*SPRITE_WIDTH, this->getY()));
-//                else
-//                    continue;
-//                break;
-//            default:
-//                break;
-//        }
-//    }
     switch (dir)
     {
         case up:
             for (int i = 1;i<4;i++)
-            if (!this->getWorld()->doesBlockMovement(this->getX(), this->getY()+i*SPRITE_HEIGHT, this))
+            if (!this->getWorld()->doesBlockFire(this->getX(), this->getY()+i*SPRITE_HEIGHT))
                 this->getWorld()->addActor(new Flame(this->getWorld(),this->getX(), this->getY()+i*SPRITE_HEIGHT));
             else
                 break;
             break;
         case down:
             for (int i = 1;i<4;i++)
-            if (!this->getWorld()->doesBlockMovement(this->getX(), this->getY()-i*SPRITE_HEIGHT, this))
+            if (!this->getWorld()->doesBlockFire(this->getX(), this->getY()-i*SPRITE_HEIGHT))
                 this->getWorld()->addActor(new Flame(this->getWorld(),this->getX(), this->getY()-i*SPRITE_HEIGHT));
             else
                 break;
             break;
         case left:
             for (int i = 1;i<4;i++)
-            if (!this->getWorld()->doesBlockMovement(this->getX()-i*SPRITE_WIDTH, this->getY(), this))
+            if (!this->getWorld()->doesBlockFire(this->getX()-i*SPRITE_WIDTH, this->getY()))
                 this->getWorld()->addActor(new Flame(this->getWorld(),this->getX()-i*SPRITE_WIDTH, this->getY()));
             else
                 break;
             break;
         case right:
             for (int i = 1;i<4;i++)
-            if (!this->getWorld()->doesBlockMovement(this->getX()+i*SPRITE_WIDTH, this->getY(), this))
+            if (!this->getWorld()->doesBlockFire(this->getX()+i*SPRITE_WIDTH, this->getY()))
                 this->getWorld()->addActor(new Flame(this->getWorld(),this->getX()+i*SPRITE_WIDTH, this->getY()));
             else
                 break;
@@ -566,10 +571,11 @@ void Penelope::throwFlame()
     }
 }
 
-bool Penelope::isAlive() const
-{
-    return getWorld()->getLives() > 0;
-}
+//bool Penelope::isAlive() const
+//{
+////    return getWorld()->getLives() > 0;
+//    return
+//}
 
 void Penelope::changeVaccine(int num)
 {
@@ -586,10 +592,41 @@ void Penelope::changeLandmine(int num)
     m_landmineCount+=num;
 }
 
+void Penelope::useVaccine()
+{
+    if (m_vaccineCount <= 0)
+        return;
+    m_vaccineCount--;
+    getCured();
+    increaseInfectCount(-getInfectCount());
+}
+
+void Penelope::putLandmine()
+{
+    this->getWorld()->addActor(new Landmine(this->getWorld(), this->getX(), this->getY()));
+}
+
 void Penelope::doSomething()
 {
     if (!isAlive())
         return;
+    
+    
+    Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
+    if (actor)
+    {
+        if (actor->getType() == e_flame)
+        {
+            this->setDead();
+            this->getWorld()->decLives();
+        }
+        if (actor->getType() == e_vomit)
+        {
+            cout<<"Penelope infected!"<<endl;
+            this->getInfected();
+        }
+    }
+    
     if (isInfected())
     {
         increaseInfectCount(1);
@@ -597,6 +634,7 @@ void Penelope::doSomething()
     if (getInfectCount() >= 500)
     {
         setDead();
+        getWorld()->decLives();
         getWorld()->playSound(SOUND_PLAYER_DIE);
         return;
     }
@@ -643,9 +681,11 @@ void Penelope::doSomething()
                 break;
             case KEY_PRESS_ENTER:
                 //...
+                useVaccine();
                 break;
             case KEY_PRESS_TAB:
                 //...
+                putLandmine();
                 break;
             default:
                 break;
@@ -687,13 +727,19 @@ ActorType Exit::getType() const
 
 void Exit::doSomething()
 {
-    //TODO: finish this
+    Actor* actorSteppedOnExit = this->getWorld()->doesOverlapWithAnyActor(this);
+    if (actorSteppedOnExit && actorSteppedOnExit->getType() == e_human)
+    {
+        actorSteppedOnExit->setDead();
+        this->getWorld()->playSound(SOUND_CITIZEN_SAVED);
+        this->getWorld()->increaseScore(500);
+    }
     if (overlap(this->getWorld()->getPenelope()))
     {
-//        if (finishedLevel())
-        if (false)//TODO: fix
-        this->getWorld()->advanceToNextLevel();
+        this->getWorld()->exitIsSteppedOn(true);
     }
+    else
+        this->getWorld()->exitIsSteppedOn(false);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -711,7 +757,25 @@ ActorType Pit::getType() const
 
 void Pit::doSomething()
 {
-    //TODO: finish this
+    if (this->overlap(this->getWorld()->getPenelope()))
+    {
+        this->getWorld()->getPenelope()->setDead();
+        this->getWorld()->playSound(SOUND_PLAYER_DIE);
+    }
+    Actor* actor = getWorld()->doesOverlapWithAnyActor(this);
+    if (!actor)
+        return;
+    if (actor->getType() == e_human)
+    {
+        actor->setDead();
+        this->getWorld()->playSound(SOUND_CITIZEN_DIE);
+        
+    }
+    if (actor->getType() == e_zombie)
+    {
+        actor->setDead();
+        this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
+    }
 }
 
 ///////////////////////////////////////////////////////////////
@@ -752,31 +816,28 @@ void Flame::doSomething()
     increaseTickCount();
     if (!isAlive())
         return;
-    Actor* actor = this->getWorld()->getActorAt(getX(), getY());
-    if (!actor)
+}
+
+///////////////////////////////////////////////////////////////
+//                          Vomit                            //
+///////////////////////////////////////////////////////////////
+Vomit::Vomit(StudentWorld* sw, double startX, double startY):Projectile(sw, IID_VOMIT, startX, startY)
+{
+    
+}
+
+ActorType Vomit::getType() const
+{
+    return ActorType::e_vomit;
+}
+
+void Vomit::doSomething()
+{
+    if (getTickCount() == 2)
+        setDead();
+    increaseTickCount();
+    if (!isAlive())
         return;
-    if (actor->getType() == ActorType::e_penelope)
-        return;
-    if (actor->getType() == ActorType::e_goodie)
-    {
-        actor->setDead();
-    }
-    if (actor->getType() == ActorType::e_zombie)
-    {
-        actor->setDead();
-        this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
-        this->getWorld()->increaseScore(1000);
-    }
-    if (actor->getType() == ActorType::e_landmine)
-    {
-        //TODO: finish this part: burning the landmine, all that type of stuff
-    }
-    if (actor->getType() == ActorType::e_human)
-    {
-        actor->setDead();
-        this->getWorld()->playSound(SOUND_CITIZEN_DIE);
-        this->getWorld()->increaseScore(-1000);
-    }
 }
 
 ///////////////////////////////////////////////////////////////
@@ -790,9 +851,6 @@ Zombie::Zombie(StudentWorld* sw, double startX, double startY):BlockMovement(sw,
 void Zombie::doSomething()
 {
     //TODO: finish
-    if (!isAlive())
-        return;
-    
 }
 
 ActorType Zombie::getType() const
@@ -803,23 +861,86 @@ ActorType Zombie::getType() const
 ///////////////////////////////////////////////////////////////
 //                        DumbZombie                         //
 ///////////////////////////////////////////////////////////////
-DumbZombie::DumbZombie(StudentWorld* sw, double startX, double startY):Zombie(sw, startX, startY)
+DumbZombie::DumbZombie(StudentWorld* sw, double startX, double startY):m_plan(0),Zombie(sw, startX, startY)
 {
     
 }
 
 void DumbZombie::doSomething()
 {
-    //TODO: finish
-    
-    increaseTickCount();
     if (!isAlive())
         return;
+    Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
+    if (actor && actor->getType() == e_flame)
+    {
+        this->setDead();
+        this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
+        this->getWorld()->increaseScore(1000);
+    }
+    increaseTickCount();
     if (isEvenTick())
         return;
+    double currX = getX(), currY = getY();
+    double vomitX = 0, vomitY = 0;
+    switch (this->getDirection()) {
+        case right:
+            vomitX = currX+SPRITE_WIDTH;
+            vomitY= currY;
+            break;
+        case left:
+            vomitX = currX - SPRITE_WIDTH;
+            vomitY = currY;
+            break;
+        case up:
+            vomitX = currX;
+            vomitY = currY+SPRITE_HEIGHT;
+            break;
+        case down:
+            vomitX = currX;
+            vomitY = currY-SPRITE_HEIGHT;
+            break;
+        default:
+            break;
+    }
+    StudentWorld* currW = this->getWorld();
+    if (currW->isHumanInfrontOfZombie(vomitX, vomitY, this->getDirection()) && randInt(1, 3) == 1)
+    {
+        currW->addActor(new Vomit(currW, vomitX, vomitY));
+        currW->playSound(SOUND_ZOMBIE_VOMIT);
+        return;
+    }
     
+    if (m_plan <= 0)
+    {
+        m_plan = randInt(3, 10);
+        this->setDirection(randInt(0, 3)*90);
+    
+    double dist_x = 0, dist_y = 0;
+    switch (this->getDirection()) {
+        case right:
+            dist_x = 1;
+            break;
+        case left:
+            dist_x = -1;
+            break;
+        case up:
+            dist_y = 1;
+            break;
+        case down:
+            dist_y = -1;
+            break;
+        default:
+            break;
+    }
+    if (!currW->doesBlockMovement(currX+dist_x, currY+dist_y, this))
+    {
+        this->moveTo(currX+dist_x, currY+dist_y);
+        m_plan--;
+    }
+    else
+        m_plan = 0;
 }
-
+}
 ///////////////////////////////////////////////////////////////
 //                       SmartZombie                         //
 ///////////////////////////////////////////////////////////////
@@ -831,6 +952,13 @@ SmartZombie::SmartZombie(StudentWorld* sw, double startX, double startY):Zombie(
 void SmartZombie::doSomething()
 {
     //TODO: finish
+    Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
+    if (actor && actor->getType() == e_flame)
+    {
+        this->setDead();
+        this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
+        this->getWorld()->increaseScore(2000);
+    }
 }
 
 ///////////////////////////////////////////////////////////////
@@ -838,4 +966,51 @@ void SmartZombie::doSomething()
 ///////////////////////////////////////////////////////////////
 
 
+Landmine::Landmine(StudentWorld* sw, double startX, double startY):m_isActive(false),m_safetyTick(30),Actor(sw, IID_LANDMINE, startX, startY, right, 1)
+    {}
 
+void Landmine::doSomething()
+{
+    //TODO: fix this
+    if (!isAlive())
+        return;
+    if (!m_isActive)
+    {
+        m_safetyTick--;
+        if (m_safetyTick == 0)
+        {
+            m_isActive = true;
+            return;
+        }
+    }
+    Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
+    if (actor)
+    {
+        if (actor->getType() == e_penelope || actor->getType() == e_zombie || actor->getType() == e_human)
+        {
+            StudentWorld* currW = this->getWorld();
+            double currX = this->getX(), currY = this->getY();
+            setDead();
+            currW->playSound(SOUND_LANDMINE_EXPLODE);
+            if (!currW->doesBlockFire(currX, currY))
+                currW->addActor(new Flame(currW, currX, currY));
+            if (!currW->doesBlockFire(currX-SPRITE_WIDTH, currY))
+                currW->addActor(new Flame(currW, currX-SPRITE_WIDTH, currY));
+            if (!currW->doesBlockFire(currX+SPRITE_WIDTH, currY))
+                currW->addActor(new Flame(currW, currX+SPRITE_WIDTH, currY));
+            if (!currW->doesBlockFire(currX, currY-SPRITE_HEIGHT))
+                currW->addActor(new Flame(currW, currX, currY-SPRITE_HEIGHT));
+            if (!currW->doesBlockFire(currX, currY+SPRITE_HEIGHT))
+                currW->addActor(new Flame(currW, currX, currY+SPRITE_HEIGHT));
+            if (!currW->doesBlockFire(currX+SPRITE_WIDTH, currY+SPRITE_HEIGHT))
+                currW->addActor(new Flame(currW, currX+SPRITE_WIDTH, currY+SPRITE_HEIGHT));
+            if (!currW->doesBlockFire(currX+SPRITE_WIDTH, currY-SPRITE_HEIGHT))
+                currW->addActor(new Flame(currW, currX+SPRITE_WIDTH, currY-SPRITE_HEIGHT));
+            if (!currW->doesBlockFire(currX-SPRITE_WIDTH, currY+SPRITE_HEIGHT))
+                currW->addActor(new Flame(currW, currX-SPRITE_WIDTH, currY+SPRITE_HEIGHT));
+            if (!currW->doesBlockFire(currX-SPRITE_WIDTH, currY-SPRITE_HEIGHT))
+                currW->addActor(new Flame(currW, currX-SPRITE_WIDTH, currY-SPRITE_HEIGHT));
+            currW->addActor(new Pit(currW, currX, currY));
+        }
+    }
+}

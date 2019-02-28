@@ -53,6 +53,7 @@ public:
     int getInfectCount() const;
     void increaseInfectCount(int num);
     void getInfected();
+    void getCured();
     bool isInfected() const;
 private:
     int m_infectCount;
@@ -72,6 +73,7 @@ class Citizen: public Human
 public:
     Citizen(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
+//    virtual ActorType getType() const;
 };
 
 class Wall : public BlockMovement
@@ -88,9 +90,11 @@ public:
     Penelope(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
     virtual ActorType getType() const;
-    bool isAlive() const;
+//    bool isAlive() const;
 //    bool isInfected() const;
     void throwFlame();
+    void useVaccine();
+    void putLandmine();
     void changeVaccine(int num);
     void changeGas(int num);
     void changeLandmine(int num);
@@ -184,6 +188,8 @@ class DumbZombie : public Zombie
 public:
     DumbZombie(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
+private:
+    int m_plan;
 };
 
 class SmartZombie : public Zombie
@@ -198,6 +204,9 @@ class Landmine : public Actor
 public:
     Landmine(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
+private:
+    int m_safetyTick;
+    bool m_isActive;
 };
 
 #endif // ACTOR_H_

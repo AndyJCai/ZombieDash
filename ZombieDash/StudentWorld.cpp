@@ -53,7 +53,7 @@ void StudentWorld::loadLevel(int level){
                         m_actors.push_back(new SmartZombie(this, startX, startY));
                         break;
                     case Level::dumb_zombie:
-                        m_actors.push_back(new SmartZombie(this, startX, startY));
+                        m_actors.push_back(new DumbZombie(this, startX, startY));
                         break;
                     case Level::player:
                         m_penelope = new Penelope(this, startX, startY);
@@ -98,24 +98,57 @@ int StudentWorld::move()
 //    // The term "actors" refers to all zombies, Penelope, goodies,
 //    // pits, flames, vomit, landmines, etc.
 //    // Give each actor a chance to do something, including Penelope
+//    if (m_penelope->isAlive())
+//        m_penelope->doSomething();
+//    else
+//        return GWSTATUS_PLAYER_DIED;
+//
+//    if (!m_penelope->isAlive() && getLives()<=0)
+//        return GWSTATUS_PLAYER_DIED;
+//    else if (!m_penelope->isAlive() && getLives() >0)
+//    {
+//        //TODO: finish
+//        loadLevel(getLevel());
+//    }
+//    else if (m_penelope->isAlive() && isLevelFinished())
+//        return GWSTATUS_FINISHED_LEVEL;
+//
+//    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+//    {
+//        if ((*iter)->isAlive())
+//        {
+//            // tell each actor to do something (e.g. move)
+//            (*iter)->doSomething();
+//
+//            //Penelope completed the current level
+////                return GWSTATUS_FINISHED_LEVEL;
+//        }
+//    }
+    
+//    if (getLives() <= 0)
+//        loadLevel(1);
+    
     if (m_penelope->isAlive())
         m_penelope->doSomething();
-    else
-        return GWSTATUS_PLAYER_DIED;
-    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
-    {
-        if ((*iter)->isAlive())
-        {
-            // tell each actor to do something (e.g. move)
-            (*iter)->doSomething();
-            if (!m_penelope->isAlive())
-                return GWSTATUS_PLAYER_DIED;
-            
-            //Penelope completed the current level
-//            if ()
-//                return GWSTATUS_FINISHED_LEVEL;
+    
+    for(Actor* actor: m_actors){
+        //PENELOPE DIED
+        if(!m_penelope->isAlive()){
+            decLives();
+            playSound(SOUND_PLAYER_DIE);
+            return GWSTATUS_PLAYER_DIED;
         }
+        //DO SOMETHING IF ALIVE
+        if(actor->isAlive())
+            actor->doSomething();
+        //LEVEL COMPLETE
+        if(numberOfCitizensLeft() == 0 && m_exitIsSteppedOn){
+            playSound(SOUND_LEVEL_FINISHED);
+            return GWSTATUS_FINISHED_LEVEL;
+        }
+        
     }
+    //CLEANUP ALL THE ACTORS
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();)
         {
             //TODO: finish this shit
@@ -131,17 +164,6 @@ int StudentWorld::move()
         }
     //
     
-//    vector<Actor*>::iterator iter = m_actors.begin();
-//        while (iter!=m_actors.end())
-//        {
-//            if (*iter && !(*iter)->isAlive())
-//            {
-//                Actor* tempIter = *iter;
-//                delete tempIter;
-//                tempIter = nullptr;
-//                m_actors.erase(iter);
-//            }
-//        }
     // Update the game status line
     //    Update Display Text
     // update the score/lives/level text at screen top
@@ -172,11 +194,13 @@ void StudentWorld::setPenelope(Penelope *p)
     m_penelope = p;
 }
                 
-Actor* StudentWorld::getActorAt(double x, double y)
+Actor* StudentWorld::doesOverlapWithAnyActor(Actor* notThisActor)
 {
+    if (notThisActor!=m_penelope && m_penelope->overlap(notThisActor))
+        return m_penelope;
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
-        if ((*iter)->getX() == x && (*iter)->getY() == y)
+        if (notThisActor!=(*iter) && (*iter)->overlap(notThisActor))
             return *iter;
     }
     return nullptr;
@@ -186,18 +210,22 @@ bool StudentWorld::doesBlockMovement(double x, double y, Actor* actor)
 {
     if (actor != m_penelope)
     {
-        if ((x + SPRITE_WIDTH - 1 >= m_penelope->getX()  && y + SPRITE_HEIGHT - 1 >= m_penelope->getY()) || (m_penelope->getX() + SPRITE_WIDTH - 1 >= x && m_penelope->getY() + SPRITE_HEIGHT - 1 >=y))
+        for (int i = 0;i<1;i++)
+        {
+            double posX = m_penelope->getX(), posY = m_penelope->getY();
+            if (x + SPRITE_WIDTH - 1 < posX || posX + SPRITE_WIDTH - 1 < x)
+                continue;
+            if (y + SPRITE_HEIGHT - 1 < posY || posY + SPRITE_HEIGHT - 1 < y)
+                continue;
             return true;
+        }
     }
-    
-    //TODO: fix the interaction between Flame with Citizen
     
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
         double posX = (*iter)->getX(), posY = (*iter)->getY();
         if (*iter == actor)
             continue;
-        
         if (!(*iter)->isBlocked())
             continue;
         if (x + SPRITE_WIDTH - 1 < posX || posX + SPRITE_WIDTH - 1 < x)
@@ -210,19 +238,31 @@ bool StudentWorld::doesBlockMovement(double x, double y, Actor* actor)
     return false;
 }
 
-//Actor* StudentWorld::collides(Actor* actor)
-//{
-//    //TODO: need to fiX!!!!!
-//    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
-//    {
-//        if ((*iter) != actor)
-//        {
-//            if (actor->overlap(**iter))
-//                return *iter;
-//        }
-//    }
-//    return nullptr;
-//}
+
+bool StudentWorld::doesBlockFire(double x, double y)
+{
+//    if ((x + SPRITE_WIDTH - 1 >= m_penelope->getX()  && y + SPRITE_HEIGHT - 1 >= m_penelope->getY()) || (m_penelope->getX() + SPRITE_WIDTH - 1 >= x && m_penelope->getY() + SPRITE_HEIGHT - 1 >=y))
+//        return true;
+    //TODO: fix the interaction between Flame with Citizen
+    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+    {
+        double posX = (*iter)->getX(), posY = (*iter)->getY();
+        if ((*iter)->getType() == e_human)
+            continue;
+        if ((*iter)->getType() == e_zombie)
+            continue;
+        if ((*iter)->getType() == e_exit)
+            continue;
+        if (!(*iter)->isBlocked())
+            continue;
+        if (x + SPRITE_WIDTH - 1 < posX || posX + SPRITE_WIDTH - 1 < x)
+            continue;
+        if (y + SPRITE_HEIGHT - 1 < posY || posY + SPRITE_HEIGHT - 1 < y)
+            continue;
+        return true;
+    }
+    return false;
+}
 
 Penelope* StudentWorld::getPenelope()
 {
@@ -236,7 +276,7 @@ StudentWorld::~StudentWorld()
 
 double StudentWorld::getClosestZombie(double x, double y)
 {
-    double distance = 9999999; //really large starting distance
+    double distance = -1; //really large starting distance
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
         if (distance == -1 || (*iter)->getType() == ActorType::e_zombie)
@@ -269,6 +309,36 @@ double StudentWorld::getClosestHuman(double x, double y)
     return distance;
 }
 
+int StudentWorld::numberOfCitizensLeft()
+{
+    int count = 0;
+    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+    {
+        if (!(*iter))
+            continue;
+        if ((*iter)->getType() == e_human)
+            count++;
+    }
+    return count;
+}
+
+void StudentWorld::exitIsSteppedOn(bool isSteppedOn)
+{
+    m_exitIsSteppedOn = isSteppedOn;
+}
+
+bool StudentWorld::isHumanInfrontOfZombie(double x, double y, int direction)
+{
+    if (m_penelope->distance(x, y)<=10)
+        return true;
+    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
+    {
+        if ((*iter)->getType() == e_human && (*iter)->distance(x, y)<=10)
+            return true;
+    }
+    return false;
+}
+
 //Score: 004500  Level: 27  Lives: 3  Vaccines:    2        Flames:    16        Mines:    1        Infected:    0
 void StudentWorld::updateGameStats()
 {
@@ -278,9 +348,8 @@ void StudentWorld::updateGameStats()
     if (getScore() < 0)
         gameStatus << "-";
     int score = getScore() >= 0? getScore():-getScore();
-    gameStatus <<setw(6) <<score;
     gameStatus.fill('0');
-    //TODO: fix filling the 0's
+    gameStatus <<setw(6) <<score;
     gameStatus << twoSpaces;
     gameStatus << "Level: ";
     gameStatus << getLevel();
