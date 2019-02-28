@@ -44,7 +44,6 @@
 		4B91F8BE2033F3F8003AFA78 /* StudentWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StudentWorld.h; sourceTree = "<group>"; };
 		4B91F8C52034176C003AFA78 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		4B91F8C720341775003AFA78 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
-		8335C4242228642C000AD32B /* report */ = {isa = PBXFileReference; lastKnownFileType = text; path = report; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,7 +82,6 @@
 				4B91F8B02033F3F7003AFA78 /* Actor.h */,
 				4B91F8B22033F3F7003AFA78 /* StudentWorld.cpp */,
 				4B91F8BE2033F3F8003AFA78 /* StudentWorld.h */,
-				8335C4242228642C000AD32B /* report */,
 				4B91F8AF2033F3F7003AFA78 /* GraphObject.h */,
 				4B91F8B52033F3F7003AFA78 /* GameConstants.h */,
 				4B91F8B82033F3F7003AFA78 /* GameController.cpp */,

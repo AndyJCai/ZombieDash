@@ -30,10 +30,10 @@ int StudentWorld::init()
 
 void StudentWorld::loadLevel(int level){
     Level lev(assetPath());
-    string levelStr = to_string(level);
-    levelStr = level < 10 ? "0"+levelStr : levelStr;
-    string levelFile = "level"+levelStr+".txt";
-//    string levelFile = "level03.txt";
+//    string levelStr = to_string(level);
+//    levelStr = level < 10 ? "0"+levelStr : levelStr;
+//    string levelFile = "level"+levelStr+".txt";
+    string levelFile = "level02.txt";
     Level::LoadResult result = lev.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found)
         cerr << "Cannot find"<<levelFile<<" data file" << endl;
@@ -95,7 +95,6 @@ void StudentWorld::addActor(Actor* actor)
 
 int StudentWorld::move()
 {
-    //TODO: change the order because negative life still works
     if (m_penelope->isAlive())
         m_penelope->doSomething();
     

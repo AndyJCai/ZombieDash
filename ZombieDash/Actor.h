@@ -80,8 +80,8 @@ class Wall : public BlockMovement
 {
 public:
     Wall(StudentWorld* sw, double startX, double startY);
-    virtual void doSomething();
     virtual ActorType getType() const;
+    virtual void doSomething();
 };
 
 class Penelope : public Human
@@ -155,7 +155,7 @@ class Projectile : public Actor
 {
 public:
     Projectile(StudentWorld* sw, int imageID, double startX, double startY);
-    virtual void doSomething();
+    virtual void doSomething()=0;
     virtual ActorType getType() const;
 };
 

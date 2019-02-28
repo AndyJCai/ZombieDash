@@ -124,7 +124,6 @@ Citizen::Citizen(StudentWorld* sw, double startX, double startY):Human(sw, IID_C
 
 void Citizen::doSomething()
 {
-    //TODO: finish this because the zombies are turning really quickly
     if (!isAlive())
         return;
     if (isInfected())
@@ -187,7 +186,7 @@ void Citizen::doSomething()
                     case right:
                         if (!getWorld()->doesBlockMovement(currX+2, currY, this))
                         {
-                            cout<<"right called"<<endl;
+//                            cout<<"right called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX+2, currY);
                             return;
@@ -196,7 +195,7 @@ void Citizen::doSomething()
                     case up:
                         if (!getWorld()->doesBlockMovement(currX, currY+2, this))
                         {
-                            cout<<"up called"<<endl;
+//                            cout<<"up called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY+2);
                             return;
@@ -205,7 +204,7 @@ void Citizen::doSomething()
                     case left:
                         if (!getWorld()->doesBlockMovement(currX-2, currY, this))
                         {
-                            cout<<"left called"<<endl;
+//                            cout<<"left called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX-2, currY);
                             return;
@@ -214,7 +213,7 @@ void Citizen::doSomething()
                     case down:
                         if (!getWorld()->doesBlockMovement(currX, currY-2, this))
                         {
-                            cout<<"down called"<<endl;
+//                            cout<<"down called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY-2);
                             return;
@@ -236,7 +235,7 @@ void Citizen::doSomething()
                     case right:
                         if (!getWorld()->doesBlockMovement(currX+2, currY, this))
                         {
-                            cout<<"right 2 called"<<endl;
+//                            cout<<"right 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX+2, currY);
                             return;
@@ -245,7 +244,7 @@ void Citizen::doSomething()
                     case up:
                         if (!getWorld()->doesBlockMovement(currX, currY+2, this))
                         {
-                            cout<<"up 2 called"<<endl;
+//                            cout<<"up 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY+2);
                             return;
@@ -255,7 +254,7 @@ void Citizen::doSomething()
                         
                         if (!getWorld()->doesBlockMovement(currX-2, currY, this))
                         {
-                            cout<<"left 2 called"<<endl;
+//                            cout<<"left 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX-2, currY);
                             return;
@@ -264,7 +263,7 @@ void Citizen::doSomething()
                     case down:
                         if (!getWorld()->doesBlockMovement(currX, currY-2, this))
                         {
-                            cout<<"down 2 called"<<endl;
+//                            cout<<"down 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY-2);
                             return;
@@ -279,7 +278,7 @@ void Citizen::doSomething()
                     case right:
                         if (!getWorld()->doesBlockMovement(currX+2, currY, this))
                         {
-                            cout<<"right 3 called"<<endl;
+//                            cout<<"right 3 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX+2, currY);
                             return;
@@ -288,7 +287,7 @@ void Citizen::doSomething()
                     case up:
                         if (!getWorld()->doesBlockMovement(currX, currY+2, this))
                         {
-                            cout<<"up 3 called"<<endl;
+//                            cout<<"up 3 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY+2);
                             return;
@@ -297,7 +296,7 @@ void Citizen::doSomething()
                     case left:
                         if (!getWorld()->doesBlockMovement(currX-2, currY, this))
                         {
-                            cout<<"left 3 called"<<endl;
+//                            cout<<"left 3 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX-2, currY);
                             return;
@@ -306,7 +305,7 @@ void Citizen::doSomething()
                     case down:
                         if (!getWorld()->doesBlockMovement(currX, currY-2, this))
                         {
-                            cout<<"down 3 called"<<endl;
+//                            cout<<"down 3 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY-2);
                             return;
@@ -501,7 +500,9 @@ ActorType Wall::getType() const
 }
 
 void Wall::doSomething()
-{}
+{
+    
+}
 
 ///////////////////////////////////////////////////////////////
 //                           Penelope                        //
@@ -509,7 +510,7 @@ void Wall::doSomething()
 
 Penelope::Penelope(StudentWorld* sw, double startX, double startY):m_flameCount(0),m_vaccineCount(0),m_landmineCount(0),Human(sw, IID_PLAYER, startX, startY)
 {
-    //TODO: finish
+    
 }
 
 ActorType Penelope::getType() const
@@ -601,7 +602,6 @@ void Penelope::doSomething()
         if (actor->getType() == e_flame)
         {
             this->setDead();
-            this->getWorld()->decLives();
         }
         if (actor->getType() == e_vomit)
         {
@@ -616,7 +616,6 @@ void Penelope::doSomething()
     if (getInfectCount() >= 500)
     {
         setDead();
-        getWorld()->decLives();
         getWorld()->playSound(SOUND_PLAYER_DIE);
         return;
     }
@@ -778,10 +777,6 @@ ActorType Projectile::getType() const
     return ActorType::e_projectile;
 }
 
-void Projectile::doSomething()
-{
-    
-}
 
 ///////////////////////////////////////////////////////////////
 //                         Flame                             //
