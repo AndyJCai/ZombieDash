@@ -21,16 +21,19 @@ StudentWorld::StudentWorld(string assetPath)
 
 int StudentWorld::init()
 {
+    m_actors = vector<Actor*>();
+    m_penelope = nullptr;
+    m_exitIsSteppedOn = false;
     loadLevel(getLevel());
     return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::loadLevel(int level){
     Level lev(assetPath());
-//    string levelStr = to_string(level);
-//    levelStr = level < 10 ? "0"+levelStr : levelStr;
-//    string levelFile = "level"+levelStr+".txt";
-    string levelFile = "level04.txt";
+    string levelStr = to_string(level);
+    levelStr = level < 10 ? "0"+levelStr : levelStr;
+    string levelFile = "level"+levelStr+".txt";
+//    string levelFile = "level04.txt";
     Level::LoadResult result = lev.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found)
         cerr << "Cannot find"<<levelFile<<" data file" << endl;
@@ -92,54 +95,20 @@ void StudentWorld::addActor(Actor* actor)
 
 int StudentWorld::move()
 {
-    // This code is here merely to allow the game to build, run, and terminate after you hit enter.
-    // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
-//
-//    // The term "actors" refers to all zombies, Penelope, goodies,
-//    // pits, flames, vomit, landmines, etc.
-//    // Give each actor a chance to do something, including Penelope
-//    if (m_penelope->isAlive())
-//        m_penelope->doSomething();
-//    else
-//        return GWSTATUS_PLAYER_DIED;
-//
-//    if (!m_penelope->isAlive() && getLives()<=0)
-//        return GWSTATUS_PLAYER_DIED;
-//    else if (!m_penelope->isAlive() && getLives() >0)
-//    {
-//        //TODO: finish
-//        loadLevel(getLevel());
-//    }
-//    else if (m_penelope->isAlive() && isLevelFinished())
-//        return GWSTATUS_FINISHED_LEVEL;
-//
-//    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
-//    {
-//        if ((*iter)->isAlive())
-//        {
-//            // tell each actor to do something (e.g. move)
-//            (*iter)->doSomething();
-//
-//            //Penelope completed the current level
-////                return GWSTATUS_FINISHED_LEVEL;
-//        }
-//    }
-    
-//    if (getLives() <= 0)
-//        loadLevel(1);
-    
+    //TODO: change the order because negative life still works
     if (m_penelope->isAlive())
         m_penelope->doSomething();
     
     for(Actor* actor: m_actors){
         //PENELOPE DIED
         if(!m_penelope->isAlive()){
-            decLives();
+            if (getLives()>0)
+                decLives();
             playSound(SOUND_PLAYER_DIE);
             return GWSTATUS_PLAYER_DIED;
         }
         //DO SOMETHING IF ALIVE
-        if(actor->isAlive())
+        if(actor && actor->isAlive())
             actor->doSomething();
         //LEVEL COMPLETE
         if(numberOfCitizensLeft() == 0 && m_exitIsSteppedOn){
@@ -147,31 +116,41 @@ int StudentWorld::move()
             return GWSTATUS_FINISHED_LEVEL;
         }
         
+        
     }
     //CLEANUP ALL THE ACTORS
-    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();)
-        {
-            //TODO: finish this shit
-            if (*iter && !(*iter)->isAlive())
-            {
-                Actor* tempIter = *iter;
-                delete tempIter;
-                tempIter = nullptr;
-                m_actors.erase(iter);
-            }
-            else
-                iter++;
-        }
-    //
+//    for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();)
+//        {
+//            if (*iter && !(*iter)->isAlive())
+//            {
+//                Actor* tempIter = *iter;
+//                delete tempIter;
+//                tempIter = nullptr;
+//                m_actors.erase(iter);
+//            }
+//            else
+//                iter++;
+//        }
     
-    // Update the game status line
-    //    Update Display Text
-    // update the score/lives/level text at screen top
-    // the player hasn’t completed the current level and hasn’t died, so
-    // continue playing the current level
+    vector<Actor*>::iterator it = m_actors.begin();
+
+    while(it != m_actors.end()){
+        if(!(*it)->isAlive()){
+            if ((*it)->getType() == e_human)
+            {
+                cout<<"Citizen being deleted"<<endl;
+            }
+            delete *it;
+            it = m_actors.erase(it);
+            
+        }
+        else{
+            it++;
+        }
+    }
+    //
     updateGameStats();
     return GWSTATUS_CONTINUE_GAME;
-//    return GWSTATUS_PLAYER_DIED;
 }
 
 void StudentWorld::cleanUp()
@@ -185,6 +164,15 @@ void StudentWorld::cleanUp()
         }
     }
 //    if (m_penelope != nullptr)
+//    vector<Actor*>::iterator it;
+//
+//    it = m_actors.begin();
+//
+//    while(it != m_actors.end())
+//    {
+//        delete *it;
+//        it++;
+//    }
     delete m_penelope;
     m_penelope = nullptr;
 }
@@ -200,7 +188,7 @@ Actor* StudentWorld::doesOverlapWithAnyActor(Actor* notThisActor)
         return m_penelope;
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
-        if (notThisActor!=(*iter) && (*iter)->overlap(notThisActor))
+        if ((*iter) && notThisActor!=(*iter) && (*iter)->overlap(notThisActor))
             return *iter;
     }
     return nullptr;
@@ -241,9 +229,6 @@ bool StudentWorld::doesBlockMovement(double x, double y, Actor* actor)
 
 bool StudentWorld::doesBlockFire(double x, double y)
 {
-//    if ((x + SPRITE_WIDTH - 1 >= m_penelope->getX()  && y + SPRITE_HEIGHT - 1 >= m_penelope->getY()) || (m_penelope->getX() + SPRITE_WIDTH - 1 >= x && m_penelope->getY() + SPRITE_HEIGHT - 1 >=y))
-//        return true;
-    //TODO: fix the interaction between Flame with Citizen
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
         double posX = (*iter)->getX(), posY = (*iter)->getY();
@@ -276,10 +261,10 @@ StudentWorld::~StudentWorld()
 
 double StudentWorld::getClosestZombie(double x, double y)
 {
-    double distance = -1; //really large starting distance
+    double distance = -1; //default distance
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
-        if ((*iter)->getType() == ActorType::e_zombie)
+        if ((*iter) && (*iter)->getType() == ActorType::e_zombie)
         {
             if (distance == -1 || (*iter)->distance(x, y) < distance)
             {
@@ -293,7 +278,7 @@ double StudentWorld::getClosestZombie(double x, double y)
 Actor* StudentWorld::getClosestHuman(double x, double y)
 {
     Actor* temp_human = nullptr;
-    double distance = -1; //really large starting distance
+    double distance = -1; //default distance
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
         if ((*iter)->getType() == ActorType::e_human)
@@ -338,13 +323,12 @@ bool StudentWorld::isHumanInfrontOfZombie(double x, double y, int direction)
         return true;
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
     {
-        if ((*iter)->getType() == e_human && (*iter)->distance(x, y)<=10)
+        if ((*iter) && (*iter)->getType() == e_human && (*iter)->distance(x, y)<=10)
             return true;
     }
     return false;
 }
 
-//Score: 004500  Level: 27  Lives: 3  Vaccines:    2        Flames:    16        Mines:    1        Infected:    0
 void StudentWorld::updateGameStats()
 {
     string twoSpaces = "  ";
