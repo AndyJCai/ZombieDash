@@ -7,7 +7,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////
 //                           Actor                           //
 ///////////////////////////////////////////////////////////////
-Actor::Actor(StudentWorld* sw, int imageID, double startX, double startY, Direction dir, int depth):m_world(sw),m_alive(true),m_tickCount(1),GraphObject(imageID, startX, startY, dir, depth, 1.0)
+Actor::Actor(StudentWorld* sw, int imageID, double startX, double startY, Direction dir, int depth):m_world(sw),m_alive(true),m_tickCount(0),GraphObject(imageID, startX, startY, dir, depth, 1.0)
 {
     
 }
@@ -451,11 +451,6 @@ void VaccineGoodie::doSomething()
     getWorld()->getPenelope()->changeVaccine(1);
 }
 
-//ActorType VaccineGoodie::getType() const
-//{
-//    return ActorType::e_vaccineGoodie;
-//}
-
 ///////////////////////////////////////////////////////////////
 //                      Gas Can Goodie                       //
 ///////////////////////////////////////////////////////////////
@@ -475,10 +470,6 @@ void GasCanGoodie::doSomething()
     currWorld->playSound(SOUND_GOT_GOODIE);
     getWorld()->getPenelope()->changeGas(5);
 }
-//ActorType GasCanGoodie::getType() const
-//{
-//    return ActorType::e_gasCanGoodie;
-//}
 
 ///////////////////////////////////////////////////////////////
 //                      Landmine Goodie                      //
@@ -571,11 +562,6 @@ void Penelope::throwFlame()
     }
 }
 
-//bool Penelope::isAlive() const
-//{
-////    return getWorld()->getLives() > 0;
-//    return
-//}
 
 void Penelope::changeVaccine(int num)
 {
@@ -622,7 +608,6 @@ void Penelope::doSomething()
         }
         if (actor->getType() == e_vomit)
         {
-            cout<<"Penelope infected!"<<endl;
             this->getInfected();
         }
     }
@@ -793,7 +778,7 @@ ActorType Projectile::getType() const
 
 void Projectile::doSomething()
 {
-    //TODO: finish this
+    
 }
 
 ///////////////////////////////////////////////////////////////
@@ -833,24 +818,24 @@ ActorType Vomit::getType() const
 
 void Vomit::doSomething()
 {
+    if (!isAlive())
+        return;
     if (getTickCount() == 2)
         setDead();
     increaseTickCount();
-    if (!isAlive())
-        return;
 }
 
 ///////////////////////////////////////////////////////////////
 //                        Zombie                             //
 ///////////////////////////////////////////////////////////////
-Zombie::Zombie(StudentWorld* sw, double startX, double startY):BlockMovement(sw, IID_ZOMBIE, startX, startY)
+Zombie::Zombie(StudentWorld* sw, double startX, double startY):m_plan(0),BlockMovement(sw, IID_ZOMBIE, startX, startY)
 {
     
 }
 
 void Zombie::doSomething()
 {
-    //TODO: finish
+    
 }
 
 ActorType Zombie::getType() const
@@ -858,10 +843,25 @@ ActorType Zombie::getType() const
     return ActorType::e_zombie;
 }
 
+void Zombie::decrementMPlan()
+{
+    m_plan--;
+}
+
+int Zombie::getMovementPlan() const
+{
+    return m_plan;
+}
+
+void Zombie::setMPlan(int num)
+{
+    m_plan = num;
+}
+
 ///////////////////////////////////////////////////////////////
 //                        DumbZombie                         //
 ///////////////////////////////////////////////////////////////
-DumbZombie::DumbZombie(StudentWorld* sw, double startX, double startY):m_plan(0),Zombie(sw, startX, startY)
+DumbZombie::DumbZombie(StudentWorld* sw, double startX, double startY):Zombie(sw, startX, startY)
 {
     
 }
@@ -910,11 +910,11 @@ void DumbZombie::doSomething()
         return;
     }
     
-    if (m_plan <= 0)
+    if (getMovementPlan() == 0)
     {
-        m_plan = randInt(3, 10);
+        setMPlan(randInt(3, 10));
         this->setDirection(randInt(0, 3)*90);
-    
+    }
     double dist_x = 0, dist_y = 0;
     switch (this->getDirection()) {
         case right:
@@ -934,12 +934,12 @@ void DumbZombie::doSomething()
     }
     if (!currW->doesBlockMovement(currX+dist_x, currY+dist_y, this))
     {
+//        cout<<"dist_x "<<dist_x<<" dist_y "<<dist_y<<endl;
         this->moveTo(currX+dist_x, currY+dist_y);
-        m_plan--;
+        decrementMPlan();
     }
     else
-        m_plan = 0;
-}
+        setMPlan(0);
 }
 ///////////////////////////////////////////////////////////////
 //                       SmartZombie                         //
@@ -952,6 +952,8 @@ SmartZombie::SmartZombie(StudentWorld* sw, double startX, double startY):Zombie(
 void SmartZombie::doSomething()
 {
     //TODO: finish
+    if (!isAlive())
+        return;
     Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
     if (actor && actor->getType() == e_flame)
     {
@@ -959,6 +961,10 @@ void SmartZombie::doSomething()
         this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
         this->getWorld()->increaseScore(2000);
     }
+    increaseTickCount();
+    if (isEvenTick())
+        return;
+    
 }
 
 ///////////////////////////////////////////////////////////////
@@ -971,7 +977,6 @@ Landmine::Landmine(StudentWorld* sw, double startX, double startY):m_isActive(fa
 
 void Landmine::doSomething()
 {
-    //TODO: fix this
     if (!isAlive())
         return;
     if (!m_isActive)
@@ -980,13 +985,13 @@ void Landmine::doSomething()
         if (m_safetyTick == 0)
         {
             m_isActive = true;
-            return;
         }
+        return;
     }
     Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
     if (actor)
     {
-        if (actor->getType() == e_penelope || actor->getType() == e_zombie || actor->getType() == e_human)
+        if (actor->getType() == e_penelope || actor->getType() == e_zombie || actor->getType() == e_human || actor->getType() == e_flame)
         {
             StudentWorld* currW = this->getWorld();
             double currX = this->getX(), currY = this->getY();

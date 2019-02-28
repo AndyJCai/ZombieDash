@@ -181,6 +181,12 @@ public:
     Zombie(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
     virtual ActorType getType() const;
+    int getMovementPlan() const;
+    void decrementMPlan();
+    void setMPlan(int num);
+    
+private:
+    int m_plan;
 };
 
 class DumbZombie : public Zombie
@@ -188,8 +194,6 @@ class DumbZombie : public Zombie
 public:
     DumbZombie(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
-private:
-    int m_plan;
 };
 
 class SmartZombie : public Zombie
