@@ -90,8 +90,6 @@ public:
     Penelope(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
     virtual ActorType getType() const;
-//    bool isAlive() const;
-//    bool isInfected() const;
     void throwFlame();
     void useVaccine();
     void putLandmine();
@@ -101,11 +99,9 @@ public:
     int getFlameCount() const;
     int getVaccineCount() const;
     int getLandmineCount() const;
-//    int getInfectCount() const;
     
 private:
     int m_flameCount;
-//    int m_infectCount;
     int m_vaccineCount;
     int m_landmineCount;
 };
@@ -132,7 +128,6 @@ class VaccineGoodie : public Goodie
 public:
     VaccineGoodie(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
-//    virtual ActorType getType() const;
 };
 
 class GasCanGoodie : public Goodie
@@ -140,7 +135,6 @@ class GasCanGoodie : public Goodie
 public:
     GasCanGoodie(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
-//    virtual ActorType getType() const;
 };
 
 class LandmineGoodie : public Goodie
@@ -148,7 +142,6 @@ class LandmineGoodie : public Goodie
 public:
     LandmineGoodie(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
-//    virtual ActorType getType() const;
 };
 
 class Projectile : public Actor
