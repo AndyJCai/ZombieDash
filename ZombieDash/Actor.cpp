@@ -166,7 +166,6 @@ void Citizen::doSomething()
         {
             if (currX == p->getX() || currY == p->getY())
             {
-                //Version 2 of setting direction
                 int dir = 0;
                 if (currX > p->getX())
                     dir = left;
@@ -181,7 +180,6 @@ void Citizen::doSomething()
                     case right:
                         if (!getWorld()->doesBlockMovement(currX+2, currY, this))
                         {
-//                            cout<<"right called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX+2, currY);
                             return;
@@ -190,7 +188,6 @@ void Citizen::doSomething()
                     case up:
                         if (!getWorld()->doesBlockMovement(currX, currY+2, this))
                         {
-//                            cout<<"up called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY+2);
                             return;
@@ -199,7 +196,6 @@ void Citizen::doSomething()
                     case left:
                         if (!getWorld()->doesBlockMovement(currX-2, currY, this))
                         {
-//                            cout<<"left called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX-2, currY);
                             return;
@@ -208,7 +204,6 @@ void Citizen::doSomething()
                     case down:
                         if (!getWorld()->doesBlockMovement(currX, currY-2, this))
                         {
-//                            cout<<"down called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY-2);
                             return;
@@ -230,7 +225,6 @@ void Citizen::doSomething()
                     case right:
                         if (!getWorld()->doesBlockMovement(currX+2, currY, this))
                         {
-//                            cout<<"right 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX+2, currY);
                             return;
@@ -239,7 +233,6 @@ void Citizen::doSomething()
                     case up:
                         if (!getWorld()->doesBlockMovement(currX, currY+2, this))
                         {
-//                            cout<<"up 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY+2);
                             return;
@@ -249,7 +242,6 @@ void Citizen::doSomething()
                         
                         if (!getWorld()->doesBlockMovement(currX-2, currY, this))
                         {
-//                            cout<<"left 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX-2, currY);
                             return;
@@ -258,7 +250,6 @@ void Citizen::doSomething()
                     case down:
                         if (!getWorld()->doesBlockMovement(currX, currY-2, this))
                         {
-//                            cout<<"down 2 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY-2);
                             return;
@@ -273,7 +264,6 @@ void Citizen::doSomething()
                     case right:
                         if (!getWorld()->doesBlockMovement(currX+2, currY, this))
                         {
-//                            cout<<"right 3 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX+2, currY);
                             return;
@@ -282,7 +272,6 @@ void Citizen::doSomething()
                     case up:
                         if (!getWorld()->doesBlockMovement(currX, currY+2, this))
                         {
-//                            cout<<"up 3 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY+2);
                             return;
@@ -291,7 +280,6 @@ void Citizen::doSomething()
                     case left:
                         if (!getWorld()->doesBlockMovement(currX-2, currY, this))
                         {
-//                            cout<<"left 3 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX-2, currY);
                             return;
@@ -300,7 +288,6 @@ void Citizen::doSomething()
                     case down:
                         if (!getWorld()->doesBlockMovement(currX, currY-2, this))
                         {
-//                            cout<<"down 3 called"<<endl;
                             this->setDirection(dir);
                             this->moveTo(currX, currY-2);
                             return;
@@ -931,7 +918,6 @@ void DumbZombie::doSomething()
     }
     if (!currW->doesBlockMovement(currX+dist_x, currY+dist_y, this))
     {
-//        cout<<"dist_x "<<dist_x<<" dist_y "<<dist_y<<endl;
         this->moveTo(currX+dist_x, currY+dist_y);
         decrementMPlan();
     }
@@ -1054,7 +1040,6 @@ void SmartZombie::doSomething()
     }
     if (!currW->doesBlockMovement(currX+dist_x, currY+dist_y, this))
     {
-        //        cout<<"dist_x "<<dist_x<<" dist_y "<<dist_y<<endl;
         this->moveTo(currX+dist_x, currY+dist_y);
         decrementMPlan();
     }
