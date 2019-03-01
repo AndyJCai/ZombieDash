@@ -28,6 +28,7 @@ int StudentWorld::init()
     return GWSTATUS_CONTINUE_GAME;
 }
 
+//Loads the indicated level
 void StudentWorld::loadLevel(int level){
     Level lev(assetPath());
     string levelStr = to_string(level);
@@ -88,6 +89,7 @@ void StudentWorld::loadLevel(int level){
     }
 }
 
+//add actor to the vector of actor pointers
 void StudentWorld::addActor(Actor* actor)
 {
     m_actors.push_back(actor);
@@ -149,11 +151,13 @@ void StudentWorld::cleanUp()
     m_penelope = nullptr;
 }
 
+//set penelope to the current world's Penelope
 void StudentWorld::setPenelope(Penelope *p)
 {
     m_penelope = p;
 }
-                
+
+//Returns the actor that the passed in actor is overlapped with, returns nullptr if there is none
 Actor* StudentWorld::doesOverlapWithAnyActor(Actor* notThisActor)
 {
     if (notThisActor!=m_penelope && m_penelope->overlap(notThisActor))
@@ -166,6 +170,7 @@ Actor* StudentWorld::doesOverlapWithAnyActor(Actor* notThisActor)
     return nullptr;
 }
 
+//checks if the current actor can move to coordinate (x,y) without being blocked given that the actor is not of type projectile
 bool StudentWorld::doesBlockMovement(double x, double y, Actor* actor)
 {
     if (actor != m_penelope)
@@ -198,7 +203,7 @@ bool StudentWorld::doesBlockMovement(double x, double y, Actor* actor)
     return false;
 }
 
-
+//checks if a flame can be instantiated at coordinate (x,y) without being blocked
 bool StudentWorld::doesBlockFire(double x, double y)
 {
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
@@ -221,6 +226,7 @@ bool StudentWorld::doesBlockFire(double x, double y)
     return false;
 }
 
+//checks if a goodie can be instantiated at coordinate (x,y) without being blocked
 bool StudentWorld::doesBlockGoodie(double x, double y)
 {
     for (vector<Actor*>::iterator iter = m_actors.begin();iter!=m_actors.end();iter++)
@@ -235,6 +241,7 @@ bool StudentWorld::doesBlockGoodie(double x, double y)
     return false;
 }
 
+//returns the pointer to the Penelope object in this world
 Penelope* StudentWorld::getPenelope()
 {
     return m_penelope;
@@ -245,6 +252,7 @@ StudentWorld::~StudentWorld()
     cleanUp();
 }
 
+//get the distance to the closest zombie
 double StudentWorld::getClosestZombie(double x, double y)
 {
     double distance = -1; //default distance
@@ -261,6 +269,7 @@ double StudentWorld::getClosestZombie(double x, double y)
     return distance;
 }
 
+//get the pointer to the closest human (penelope or citizen)
 Actor* StudentWorld::getClosestHuman(double x, double y)
 {
     Actor* temp_human = nullptr;
@@ -285,6 +294,7 @@ Actor* StudentWorld::getClosestHuman(double x, double y)
     return temp_human;
 }
 
+//returns the number of citizens left
 int StudentWorld::numberOfCitizensLeft()
 {
     int count = 0;
@@ -298,11 +308,13 @@ int StudentWorld::numberOfCitizensLeft()
     return count;
 }
 
+//check if the exit object is being stepped on
 void StudentWorld::exitIsSteppedOn(bool isSteppedOn)
 {
     m_exitIsSteppedOn = isSteppedOn;
 }
 
+//check if there is any Human object in the direction that the zombie is facing
 bool StudentWorld::isHumanInfrontOfZombie(double x, double y, int direction)
 {
     if (m_penelope->distance(x, y)<=10)

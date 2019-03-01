@@ -656,11 +656,11 @@ void Penelope::doSomething()
                 throwFlame();
                 break;
             case KEY_PRESS_ENTER:
-                //...
+                //... use vaccine if there is any
                 useVaccine();
                 break;
             case KEY_PRESS_TAB:
-                //...
+                //... place landmine if there is any
                 putLandmine();
                 break;
             default:
@@ -865,7 +865,6 @@ void DumbZombie::doSomething()
         if (randInt(1, 10) == 1)
         {
             //Drop Vaccine Goodie
-            //When a dumb zombie drops a vaccine goodie, it does not simply drop it at its own (x,y) coordinates, but tries to fling it away instead: It chooses a random direction, computes the coordinates SPRITE_WIDTH units away if the direction is left or right or SPRITE_HEIGHT units away if it is up or down, and if no other object in the game would overlap with an object created at those coordinates, introduces a new vaccine goodie at those coordinates; otherwise, it does not introduce a vaccine object.
             int randDir = randInt(0, 3)*90;
             double vacX = 0, vacY = 0;
             switch (randDir) {
