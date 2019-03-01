@@ -131,7 +131,7 @@ void Citizen::doSomething()
             this->getInfected();
             this->getWorld()->playSound(SOUND_CITIZEN_INFECTED);
         }
-        else if (actor->getType() ==ActorType::e_flame)
+        else if (actor->getType() ==ActorType::e_flame || actor->getType() == e_pit)
         {
             this->setDead();
             this->getWorld()->playSound(SOUND_CITIZEN_DIE);
@@ -741,20 +741,6 @@ void Pit::doSomething()
         this->getWorld()->getPenelope()->setDead();
         this->getWorld()->playSound(SOUND_PLAYER_DIE);
     }
-    Actor* actor = getWorld()->doesOverlapWithAnyActor(this);
-    if (!actor)
-        return;
-    if (actor->getType() == e_human)
-    {
-        actor->setDead();
-        this->getWorld()->playSound(SOUND_CITIZEN_DIE);
-        
-    }
-    if (actor->getType() == e_zombie)
-    {
-        actor->setDead();
-        this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
-    }
 }
 
 ///////////////////////////////////////////////////////////////
@@ -966,7 +952,7 @@ void SmartZombie::doSomething()
     if (!isAlive())
         return;
     Actor* actor = this->getWorld()->doesOverlapWithAnyActor(this);
-    if (actor && actor->getType() == e_flame)
+    if (actor && (actor->getType() == e_flame || actor->getType() == e_pit))
     {
         this->setDead();
         this->getWorld()->playSound(SOUND_ZOMBIE_DIE);
