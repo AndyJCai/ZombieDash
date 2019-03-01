@@ -157,7 +157,7 @@ void Citizen::doSomething()
     double currX = this->getX();
     double currY = this->getY();
     Penelope* p = this->getWorld()->getPenelope();
-    double dist_p = sqrt((currX - p->getX())*(currX - p->getX()) + (currY - p->getY())*(currY - p->getY()));
+    double dist_p = distance(p->getX(), p->getY());
     double dist_z = this->getWorld()->getClosestZombie(currX, currY);
     
     if (dist_z == -1 || dist_p < dist_z)
@@ -167,14 +167,14 @@ void Citizen::doSomething()
             if (currX == p->getX() || currY == p->getY())
             {
                 //Version 2 of setting direction
-                int dir = -1;
+                int dir = 0;
                 if (currX > p->getX())
                     dir = left;
-                else
+                else if (currX < p->getX())
                     dir = right;
                 if (currY > p->getY())
                     dir = down;
-                else
+                else if (currY < p->getY())
                     dir = up;
                 switch (dir)
                 {
@@ -311,89 +311,87 @@ void Citizen::doSomething()
                 }
             }
         }
-        else if (dist_z <= 80)
+        return;
+    }
+    else if (dist_z!= -1 && dist_z <= 80)
+    {
+        double projectedDistance;
+        int dir = -1;
+        if (!getWorld()->doesBlockMovement(currX+2, currY, this))
         {
-            double projectedDistance;
-            int dir = -1;
-            if (!getWorld()->doesBlockMovement(currX+2, currY, this))
+            projectedDistance = getWorld()->getClosestZombie(currX+2, currY);
+            if (dist_z < projectedDistance)
             {
-                projectedDistance = getWorld()->getClosestZombie(currX+2, currY);
-                if (dist_z < projectedDistance)
-                {
-                    dir = right;
-                    dist_z = projectedDistance;
-                }
+                dir = right;
+                dist_z = projectedDistance;
             }
-            if (!getWorld()->doesBlockMovement(currX, currY+2, this))
-            {
-                projectedDistance = getWorld()->getClosestZombie(currX, currY+2);
-                if (dist_z < projectedDistance)
-                {
-                    dir = up;
-                    dist_z = projectedDistance;
-                }
-            }
-            if (!getWorld()->doesBlockMovement(currX-2, currY, this))
-            {
-                projectedDistance = getWorld()->getClosestZombie(currX-2, currY);
-                if (dist_z < projectedDistance)
-                {
-                    dir = left;
-                    dist_z = projectedDistance;
-                }
-            }
-            if (!getWorld()->doesBlockMovement(currX, currY-2, this))
-            {
-                projectedDistance = getWorld()->getClosestZombie(currX, currY-2);
-                if (dist_z < projectedDistance)
-                {
-                    dir = down;
-                    dist_z = projectedDistance;
-                }
-            }
-            if (dir == -1)
-                return;
-            switch (dir)
-            {
-                case right:
-                    if (!getWorld()->doesBlockMovement(currX+2, currY, this))
-                    {
-                        this->setDirection(dir);
-                        this->moveTo(currX+2, currY);
-                        return;
-                    }
-                    break;
-                case up:
-                    if (!getWorld()->doesBlockMovement(currX, currY+2, this))
-                    {
-                        this->setDirection(dir);
-                        this->moveTo(currX, currY+2);
-                        return;
-                    }
-                    break;
-                case left:
-                    if (!getWorld()->doesBlockMovement(currX-2, currY, this))
-                    {
-                        this->setDirection(dir);
-                        this->moveTo(currX-2, currY);
-                        return;
-                    }
-                    break;
-                case down:
-                    if (!getWorld()->doesBlockMovement(currX, currY-2, this))
-                    {
-                        this->setDirection(dir);
-                        this->moveTo(currX, currY-2);
-                        return;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            return;
         }
-        else
-            return;
+        if (!getWorld()->doesBlockMovement(currX, currY+2, this))
+        {
+            projectedDistance = getWorld()->getClosestZombie(currX, currY+2);
+            if (dist_z < projectedDistance)
+            {
+                dir = up;
+                dist_z = projectedDistance;
+            }
+        }
+        if (!getWorld()->doesBlockMovement(currX-2, currY, this))
+        {
+            projectedDistance = getWorld()->getClosestZombie(currX-2, currY);
+            if (dist_z < projectedDistance)
+            {
+                dir = left;
+                dist_z = projectedDistance;
+            }
+        }
+        if (!getWorld()->doesBlockMovement(currX, currY-2, this))
+        {
+            projectedDistance = getWorld()->getClosestZombie(currX, currY-2);
+            if (dist_z < projectedDistance)
+            {
+                dir = down;
+                dist_z = projectedDistance;
+            }
+        }
+        switch (dir)
+        {
+            case right:
+                if (!getWorld()->doesBlockMovement(currX+2, currY, this))
+                {
+                    this->setDirection(dir);
+                    this->moveTo(currX+2, currY);
+                    return;
+                }
+                break;
+            case up:
+                if (!getWorld()->doesBlockMovement(currX, currY+2, this))
+                {
+                    this->setDirection(dir);
+                    this->moveTo(currX, currY+2);
+                    return;
+                }
+                break;
+            case left:
+                if (!getWorld()->doesBlockMovement(currX-2, currY, this))
+                {
+                    this->setDirection(dir);
+                    this->moveTo(currX-2, currY);
+                    return;
+                }
+                break;
+            case down:
+                if (!getWorld()->doesBlockMovement(currX, currY-2, this))
+                {
+                    this->setDirection(dir);
+                    this->moveTo(currX, currY-2);
+                    return;
+                }
+                break;
+            default:
+                return;
+                break;
+        }
+        return;
     }
 }
 
@@ -1010,9 +1008,16 @@ void SmartZombie::doSomething()
     if (getMovementPlan() == 0)
     {
         setMPlan(randInt(3, 10));
+        double humanX = -1, humanY = -1;
         Actor* closest_human = currW->getClosestHuman(currX, currY);
-        double humanX = closest_human->getX(), humanY = closest_human->getY();
-        double dist_human = this->distance(humanX, humanY);
+        if (closest_human)
+        {
+            humanX = closest_human->getX();
+            humanY = closest_human->getY();
+        }
+        double dist_human = -1;
+        if (closest_human)
+            dist_human = this->distance(humanX, humanY);
         if (dist_human > 80)
         {
             this->setDirection(randInt(0, 3)*90);
@@ -1032,6 +1037,15 @@ void SmartZombie::doSomething()
                     this->setDirection(right);
                 else
                     this->setDirection(left);
+            }
+            else
+            {
+                int dir1 = currX < humanX? right: left;
+                int dir2 = currY < humanY? up: down;
+                if (randInt(1, 2) == 1)
+                    this->setDirection(dir1);
+                else
+                    this->setDirection(dir2);
             }
         }
     }

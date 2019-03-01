@@ -34,7 +34,7 @@ void StudentWorld::loadLevel(int level){
     string levelStr = to_string(level);
     levelStr = level < 10 ? "0"+levelStr : levelStr;
     string levelFile = "level"+levelStr+".txt";
-//    string levelFile = "level04.txt"; //for testing purposes only
+//    string levelFile = "level03.txt"; //for testing purposes only
     Level::LoadResult result = lev.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found)
         cerr << "Cannot find"<<levelFile<<" data file" << endl;
@@ -286,10 +286,9 @@ Actor* StudentWorld::getClosestHuman(double x, double y)
         }
     }
     
-    if (distance > m_penelope->distance(x, y))
+    if (distance == -1 || distance > m_penelope->distance(x, y))
     {
-        distance = m_penelope->distance(x, y);
-        temp_human = m_penelope;
+        return m_penelope;
     }
     return temp_human;
 }
