@@ -9,7 +9,7 @@
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
 enum ActorType {
-    e_penelope, e_actor, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame, e_zombie, e_human, e_projectile, e_landmine, e_vomit
+    e_penelope, e_blockMovement, e_goodie, e_wall, e_exit, e_pit, e_flame, e_zombie, e_human, e_projectile, e_landmine, e_vomit
 };
 
 class StudentWorld;
@@ -22,7 +22,7 @@ public:
     virtual bool isAlive() const;
     virtual bool isBlocked() const;
     //Methods to check overlapping
-    virtual ActorType getType() const;
+    virtual ActorType getType() const =0;
     StudentWorld* getWorld() const;
     virtual bool overlap(Actor* otherActor) const;
     void setDead();
@@ -148,7 +148,7 @@ class Projectile : public Actor
 {
 public:
     Projectile(StudentWorld* sw, int imageID, double startX, double startY);
-    virtual void doSomething()=0;
+    void doSomething();
     virtual ActorType getType() const;
 };
 
@@ -156,7 +156,7 @@ class Flame : public Projectile
 {
 public:
     Flame(StudentWorld* sw, double startX, double startY);
-    virtual void doSomething();
+//    virtual void doSomething();
     virtual ActorType getType() const;
 };
 
@@ -164,7 +164,7 @@ class Vomit : public Projectile
 {
 public:
     Vomit(StudentWorld* sw, double startX, double startY);
-    virtual void doSomething();
+//    virtual void doSomething();
     virtual ActorType getType() const;
 };
 
@@ -201,6 +201,7 @@ class Landmine : public Actor
 public:
     Landmine(StudentWorld* sw, double startX, double startY);
     virtual void doSomething();
+    virtual ActorType getType() const;
 private:
     int m_safetyTick;
     bool m_isActive;

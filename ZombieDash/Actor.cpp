@@ -38,11 +38,6 @@ void Actor::setDead()
     m_alive = false;
 }
 
-ActorType Actor::getType() const
-{
-    return ActorType::e_actor;
-}
-
 double Actor::distance(double x, double y) const
 {
     return sqrt((getX()-x)*(getX()-x)+(getY()-y)*(getY()-y));
@@ -777,6 +772,15 @@ ActorType Projectile::getType() const
     return ActorType::e_projectile;
 }
 
+void Projectile::doSomething()
+{
+    if (getTickCount() == 2)
+        setDead();
+    increaseTickCount();
+    if (!isAlive())
+        return;
+}
+
 
 ///////////////////////////////////////////////////////////////
 //                         Flame                             //
@@ -789,15 +793,6 @@ Flame::Flame(StudentWorld* sw, double startX, double startY):Projectile(sw, IID_
 ActorType Flame::getType() const
 {
     return ActorType::e_flame;
-}
-
-void Flame::doSomething()
-{
-    if (getTickCount() == 2)
-        setDead();
-    increaseTickCount();
-    if (!isAlive())
-        return;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -813,14 +808,6 @@ ActorType Vomit::getType() const
     return ActorType::e_vomit;
 }
 
-void Vomit::doSomething()
-{
-    if (!isAlive())
-        return;
-    if (getTickCount() == 2)
-        setDead();
-    increaseTickCount();
-}
 
 ///////////////////////////////////////////////////////////////
 //                        Zombie                             //
@@ -1084,6 +1071,10 @@ void SmartZombie::doSomething()
 
 Landmine::Landmine(StudentWorld* sw, double startX, double startY):m_isActive(false),m_safetyTick(30),Actor(sw, IID_LANDMINE, startX, startY, right, 1)
     {}
+
+ActorType Landmine::getType() const{
+    return ActorType::e_landmine;
+}
 
 void Landmine::doSomething()
 {
