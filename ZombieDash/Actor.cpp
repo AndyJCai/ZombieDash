@@ -567,7 +567,12 @@ void Penelope::useVaccine()
 
 void Penelope::putLandmine()
 {
-    this->getWorld()->addActor(new Landmine(this->getWorld(), this->getX(), this->getY()));
+    if (m_landmineCount > 0)
+    {
+        this->getWorld()->addActor(new Landmine(this->getWorld(), this->getX(), this->getY()));
+        m_landmineCount--;
+
+    }
 }
 
 void Penelope::doSomething()

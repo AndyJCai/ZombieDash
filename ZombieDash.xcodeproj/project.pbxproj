@@ -282,24 +282,30 @@
 		4B91F8AD2033F260003AFA78 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 682Y7UP5X7;
 				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/freeglut/3.0.0/include/GL;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/freeglut/3.0.0/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				"OTHER_LDFLAGS[arch=*]" = "-lglut";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		4B91F8AE2033F260003AFA78 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 682Y7UP5X7;
 				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/freeglut/3.0.0/include/GL;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/freeglut/3.0.0/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				"OTHER_LDFLAGS[arch=*]" = "-lglut";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};

@@ -25,7 +25,7 @@ bool is_directory(string path)
   // e.g., "Z:/CS32/ZombieDash/Assets" or "/Users/fred/cs32/ZombieDash/Assets"
 
 //const string assetDirectory = "Assets";
-const string assetDirectory = "/Users/andycai/Desktop/Project3/ZombieDash/DerivedData/ZombieDash/Build/Products/Debug/Assets";
+const string assetDirectory = "/Users/andycai/Desktop/CS32 Projects:HW/Project3/ZombieDash/DerivedData/ZombieDash/Build/Products/Debug/Assets";
 
 class GameWorld;
 
